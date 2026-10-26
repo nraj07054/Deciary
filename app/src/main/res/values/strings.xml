@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Deciary</string>
+    <string name="reminder_channel">Letters due</string>
+    <string name="reminder_channel_desc">A gentle note on the day a letter can be opened.</string>
+</resources>
