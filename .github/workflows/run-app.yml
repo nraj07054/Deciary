@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "app/src/androidTest/**"
+      - "app/**"
+      - "gradle/**"
       - ".github/workflows/run-app.yml"
 
 permissions:
