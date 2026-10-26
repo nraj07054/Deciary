@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
@@ -39,10 +40,28 @@ class WalkthroughTest {
         sh("screencap -p /sdcard/Download/deciary-shots/%02d-%s.png".format(shot, name))
     }
 
-    private fun tap(text: String) = rule.onNodeWithText(text).performClick()
+    /** Retries a tap that lands while a window (such as the keyboard) is still animating away. */
+    private fun retry(action: () -> Unit) {
+        repeat(4) { attempt ->
+            try {
+                rule.waitForIdle()
+                action()
+                return
+            } catch (e: AssertionError) {
+                if (attempt == 3 || e.message?.contains("inject") != true) throw e
+                Thread.sleep(1000)
+            }
+        }
+    }
 
-    private fun type(label: String, value: String) =
+    private fun tap(text: String) = retry { rule.onNodeWithText(text).performClick() }
+
+    private fun tapDescribed(description: String) = retry { rule.onNodeWithContentDescription(description).performClick() }
+
+    private fun type(label: String, value: String) {
         rule.onNode(hasSetTextAction() and hasText(label)).performScrollTo().performTextInput(value)
+        Espresso.closeSoftKeyboard()
+    }
 
     @Test
     fun walkThroughTheApp() {
@@ -56,7 +75,7 @@ class WalkthroughTest {
         screenshot("welcome-3")
         tap("Not now")
         type("Name on the cover · optional", "Priya")
-        rule.onNodeWithText("Plum").performClick()
+        tap("Plum")
         screenshot("cover")
         tap("Open my diary")
         screenshot("home-empty")
@@ -74,7 +93,7 @@ class WalkthroughTest {
         tap("Excited")
         screenshot("write-mood-date")
         tap("Next")
-        rule.onNodeWithContentDescription("85 percent, Confident").performClick()
+        tapDescribed("85 percent, Confident")
         screenshot("write-how-sure")
         tap("Challenge me first")
         screenshot("challenge-1")
@@ -93,7 +112,7 @@ class WalkthroughTest {
         screenshot("open-early-dialog")
         tap("Open now")
         type("What happened?", "Settled in by March. Miss the old team a little.")
-        rule.onNodeWithText("Better").performScrollTo().performClick()
+        retry { rule.onNodeWithText("Better").performScrollTo().performClick() }
         screenshot("then-and-now")
         tap("See verdict")
         screenshot("verdict")
@@ -105,9 +124,9 @@ class WalkthroughTest {
         tap("See all")
         screenshot("shelf")
         rule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        rule.onNodeWithContentDescription("Settings").performClick()
+        tapDescribed("Settings")
         screenshot("settings")
-        rule.onNodeWithText("Your data").performScrollTo().performClick()
+        retry { rule.onNodeWithText("Your data").performScrollTo().performClick() }
         screenshot("your-data")
     }
 }
