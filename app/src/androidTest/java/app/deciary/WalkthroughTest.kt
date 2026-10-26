@@ -3,6 +3,7 @@ package app.deciary
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -54,7 +55,11 @@ class WalkthroughTest {
         }
     }
 
-    private fun tap(text: String) = retry { rule.onNodeWithText(text).performClick() }
+    /** Some buttons (the extended FAB) keep their label only in the unmerged tree; look there if needed. */
+    private fun tap(text: String) = retry {
+        val merged = rule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+        rule.onNodeWithText(text, useUnmergedTree = !merged).performClick()
+    }
 
     private fun tapDescribed(description: String) = retry { rule.onNodeWithContentDescription(description).performClick() }
 
