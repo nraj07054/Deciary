@@ -194,7 +194,7 @@ fun LetterScreen(
             Spacer(Modifier.height(20.dp))
         }
         if (!letter.isOpened) {
-            Column(Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp)) {
                 if (letter.isDue(today)) {
                     PrimaryButton("Open letter", onClick = onOpen)
                 } else {
