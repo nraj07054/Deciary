@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Restore, wrong password</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,450,0,0&amp;icon_names=add,arrow_back,arrow_forward,call,check,chevron_right,close,edit,error,fingerprint,lock,notifications_off,search,tune,visibility&amp;display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,500;1,9..144,600&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D1A33}a:hover{color:#5E587A}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 24;flex:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F5F2FB; font-family: 'Noto Sans', sans-serif; color: #1D1A33;">
+  <div aria-hidden="true" style="position: absolute; inset: 0; padding: 72px 16px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="height: 34px; width: 55%; border-radius: 10px; background: #E4DEF2;"></div>
+    <div style="height: 240px; border-radius: 28px; background: #FFFFFF;"></div>
+    <div style="height: 190px; border-radius: 22px; background: #FFFFFF;"></div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(29,26,51,0.5);"></div>
+
+  <section role="dialog" aria-label="Restore from a backup" style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 30px 30px 0 0; padding: 10px 20px 24px; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box;">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: #E4DEF2;"></div>
+    <h1 style="margin: 4px 0 0; font-family: 'Fraunces', serif; font-weight: 800; font-size: 26px; line-height: 1.15;">Restore from a backup</h1>
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: #F5F2FB;">
+      <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 12px; background: #E8F1FD; display: flex; align-items: center; justify-content: center;"><img src="../img/inbox-tray.png" alt="" width="30" height="30" style="width: 30px; height: 30px;"></span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 15px; font-weight: 600;">deciary-backup-11-oct</span><span style="font-size: 12px; color: #5E587A;">From Downloads · 21 letters</span></span>
+      <button style="min-height: 44px; border: 0; background: transparent; font-family: 'Noto Sans', sans-serif; font-size: 14px; font-weight: 700; color: #5A3DD0;">Change</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <label for="pw" style="font-size: 14px; font-weight: 700;">Backup password</label>
+      <input id="pw" type="password" value="password1" aria-invalid="true" aria-describedby="pw-err" style="height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 16px; border: 0; box-shadow: inset 0 0 0 2px #C0392B; background: #FFFFFF; font-family: 'Noto Sans', sans-serif; font-size: 16px; color: #1D1A33;">
+      <span id="pw-err" style="display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 1.45; color: #A93226;"><span class="msr" aria-hidden="true" style="font-size: 16px; flex: none; margin-top: 1px;">error</span>That password doesn't open this backup. Check it and try again.</span>
+    </div>
+
+    <button style="height: 56px; border: 0; border-radius: 28px; background: #6E4FE6; color: #FFFFFF; font-family: 'Noto Sans', sans-serif; font-size: 16px; font-weight: 700;">Try again</button>
+    <button style="min-height: 44px; border: 0; background: transparent; font-family: 'Noto Sans', sans-serif; font-size: 15px; font-weight: 700; color: #1D1A33;">Cancel</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

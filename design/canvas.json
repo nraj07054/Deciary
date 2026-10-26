@@ -1,0 +1,277 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-23T15:40:00Z"
+  },
+  "title": "Deciary v1 Screens",
+  "launch": {
+    "view": "canvas",
+    "page": "v2"
+  },
+  "pages": [
+    {
+      "id": "v2",
+      "name": "v2 · Redesign"
+    }
+  ],
+  "boards": {
+    "V2Welcome.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Welcome",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Cover.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "2 · Diary cover",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Home.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3 · Home",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2HomeNight.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3b · Home, night desk",
+      "page": "v2",
+      "radius": 32
+    },
+    "V2Lock.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Lock screen",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Write.dc.html": {
+      "x": 0,
+      "y": 1300,
+      "w": 390,
+      "h": 844,
+      "title": "4 · New decision · how sure",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Challenge.dc.html": {
+      "x": 470,
+      "y": 1300,
+      "w": 390,
+      "h": 844,
+      "title": "5 · Challenge deck",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Sealed.dc.html": {
+      "x": 940,
+      "y": 1300,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Sealed",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Letter.dc.html": {
+      "x": 0,
+      "y": 2600,
+      "w": 390,
+      "h": 844,
+      "title": "7 · Letter (due)",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Review.dc.html": {
+      "x": 470,
+      "y": 2600,
+      "w": 390,
+      "h": 1100,
+      "title": "8 · Then & now (full scroll)",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Verdict.dc.html": {
+      "x": 940,
+      "y": 2600,
+      "w": 390,
+      "h": 844,
+      "title": "9 · Verdict",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Letters.dc.html": {
+      "x": 0,
+      "y": 4100,
+      "w": 390,
+      "h": 844,
+      "title": "10 · Your shelf",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Settings.dc.html": {
+      "x": 470,
+      "y": 4100,
+      "w": 390,
+      "h": 1000,
+      "title": "11 · Settings (full scroll)",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Data.dc.html": {
+      "x": 940,
+      "y": 4100,
+      "w": 390,
+      "h": 844,
+      "title": "12 · Your data",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2HomeEmpty.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3a · Home, first launch",
+      "page": "v2",
+      "is_interactive": true,
+      "radius": 32
+    },
+    "V2Brand.dc.html": {
+      "x": 0,
+      "y": -1300,
+      "w": 1200,
+      "h": 844,
+      "title": "Logo",
+      "page": "v2",
+      "radius": 24
+    },
+    "V2HomeBusy.dc.html": {
+      "x": 0,
+      "y": 5600,
+      "w": 390,
+      "h": 844,
+      "title": "Home · 5 due, reminders off",
+      "page": "v2",
+      "radius": 32
+    },
+    "V2Restore.dc.html": {
+      "x": 470,
+      "y": 5600,
+      "w": 390,
+      "h": 844,
+      "title": "Restore · wrong password",
+      "page": "v2",
+      "radius": 32
+    },
+    "V2Safety.dc.html": {
+      "x": 940,
+      "y": 5600,
+      "w": 390,
+      "h": 844,
+      "title": "Safety sheet (stays plain)",
+      "page": "v2",
+      "radius": 32
+    }
+  },
+  "order": [
+    "V2Welcome.dc.html",
+    "V2Cover.dc.html",
+    "V2HomeEmpty.dc.html",
+    "V2Home.dc.html",
+    "V2HomeNight.dc.html",
+    "V2Lock.dc.html",
+    "V2Write.dc.html",
+    "V2Challenge.dc.html",
+    "V2Sealed.dc.html",
+    "V2Letter.dc.html",
+    "V2Review.dc.html",
+    "V2Verdict.dc.html",
+    "V2Letters.dc.html",
+    "V2Settings.dc.html",
+    "V2Data.dc.html",
+    "V2Brand.dc.html",
+    "V2HomeBusy.dc.html",
+    "V2Restore.dc.html",
+    "V2Safety.dc.html"
+  ],
+  "notes": {
+    "v2row1": {
+      "x": 0,
+      "y": -300,
+      "text": "First run & Home",
+      "kind": "title1",
+      "maxW": 2740,
+      "page": "v2"
+    },
+    "v2row2": {
+      "x": 0,
+      "y": 1000,
+      "text": "Writing a letter",
+      "kind": "title1",
+      "maxW": 1330,
+      "page": "v2"
+    },
+    "v2row3": {
+      "x": 0,
+      "y": 2300,
+      "text": "Opening a letter",
+      "kind": "title1",
+      "maxW": 1330,
+      "page": "v2"
+    },
+    "v2row4": {
+      "x": 0,
+      "y": 3800,
+      "text": "Shelf & control",
+      "kind": "title1",
+      "maxW": 1330,
+      "page": "v2"
+    },
+    "v2brand": {
+      "x": 0,
+      "y": -1600,
+      "text": "Logo",
+      "kind": "title1",
+      "maxW": 1200,
+      "page": "v2"
+    },
+    "v2row5": {
+      "x": 0,
+      "y": 5300,
+      "text": "Edge states",
+      "kind": "title1",
+      "maxW": 1330,
+      "page": "v2"
+    }
+  },
+  "designSystems": []
+}

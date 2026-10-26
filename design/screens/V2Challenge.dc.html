@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Challenge cards</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,450,0,0&amp;icon_names=add,arrow_back,arrow_forward,call,check,chevron_right,close,edit,error,fingerprint,lock,notifications_off,search,tune,visibility&amp;display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,500;1,9..144,600&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D1A33}a:hover{color:#5E587A}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 24;flex:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #F5F2FB; font-family: 'Noto Sans', sans-serif; color: #1D1A33;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 0 4px; height: 56px;">
+    <a href="V2Write.dc.html" aria-label="Back to your letter" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #1D1A33;"><span class="msr" aria-hidden="true" style="font-size: 24px;">arrow_back</span></a>
+    <span style="font-size: 13px; font-weight: 700; color: #5E587A;">Question {{pos}} of 3</span>
+  </div>
+
+  <div style="padding: 12px 20px 0; display: flex; flex-direction: column; gap: 6px;">
+    <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 800; font-size: 32px; line-height: 1.08;">Before you <span style="font-style: italic; font-weight: 500; color: #5A3DD0;">seal it</span></h1>
+    <p style="margin: 0; font-size: 15px; color: #5E587A;">Three quick questions. None of them stop you saving.</p>
+  </div>
+
+  <div style="position: relative; margin: 28px 16px 0; height: 380px;">
+    <div aria-hidden="true" style="position: absolute; left: 18px; right: 18px; top: 16px; bottom: -14px; border-radius: 30px; background: #E4DEF2;"></div>
+    <div style="position: absolute; inset: 0; border-radius: 30px; background: #FFFFFF; box-shadow: 0 20px 36px -22px rgba(29,26,51,0.5); padding: 28px 24px; box-sizing: border-box; display: flex; flex-direction: column;">
+      <span aria-hidden="true" style="width: 88px; height: 88px; border-radius: 26px; background: #EDE7FD; display: flex; align-items: center; justify-content: center;"><img src="{{art}}" alt="" width="64" height="64" style="width: 64px; height: 64px;"></span>
+      <span style="margin-top: 22px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5A3DD0;">{{kind}}</span>
+      <h2 style="margin: 8px 0 0; font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; line-height: 1.28;">{{line}}</h2>
+      <div style="flex: 1;"></div>
+      <a href="V2Write.dc.html" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: #1D1A33;"><span class="msr" aria-hidden="true" style="font-size: 18px;">edit</span>This changes things · edit my letter</a>
+    </div>
+  </div>
+
+  <div aria-hidden="true" style="display: flex; justify-content: center; gap: 6px; margin-top: 34px;">
+    <sc-for list="{{dots}}" as="d" hint-placeholder-count="3">
+      <span style="width: {{d.w}}px; height: 8px; border-radius: 4px; background: {{d.bg}};"></span>
+    </sc-for>
+  </div>
+
+  <div style="flex: 1;"></div>
+  <div style="padding: 0 16px 24px;">
+    <sc-if value="{{more}}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{next}}" style="width: 100%; height: 56px; border: 0; border-radius: 28px; background: #6E4FE6; color: #FFFFFF; font-family: 'Noto Sans', sans-serif; font-size: 16px; font-weight: 700; box-shadow: 0 12px 22px -10px rgba(78,52,190,0.6); cursor: pointer;">Noted · next question</button>
+    </sc-if>
+    <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+      <a href="V2Sealed.dc.html" style="height: 56px; border-radius: 28px; background: #6E4FE6; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; font-weight: 700; box-shadow: 0 12px 22px -10px rgba(78,52,190,0.6);">I've thought about this · Seal it</a>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 1 }; }
+  renderVals() {
+    var self = this, i = this.state.i;
+    var cards = [
+      { art: 'img/balance-scale.png', kind: 'The other side', line: 'What would make saying no the right call?' },
+      { art: 'img/eye.png', kind: 'Blind spot', line: 'You said 95%. What would you need to see to drop to 70%?' },
+      { art: 'img/hourglass-done.png', kind: 'Past you', line: 'How did your last big move feel six months in?' }
+    ];
+    return {
+      pos: i + 1, art: cards[i].art, kind: cards[i].kind, line: cards[i].line,
+      more: i < 2, done: i === 2,
+      next: function () { self.setState({ i: Math.min(2, i + 1) }); },
+      dots: [0, 1, 2].map(function (n) { return { w: n === i ? 22 : 8, bg: n === i ? '#6E4FE6' : '#DCD3F5' }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

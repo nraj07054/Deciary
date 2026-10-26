@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verdict</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,450,0,0&amp;icon_names=add,arrow_back,arrow_forward,call,check,chevron_right,close,edit,error,fingerprint,lock,notifications_off,search,tune,visibility&amp;display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,500;1,9..144,600&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D1A33}a:hover{color:#5E587A}
+.msr{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 24;flex:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #F5F2FB; font-family: 'Noto Sans', sans-serif; color: #1D1A33;">
+
+  <div style="display: flex; align-items: center; padding: 8px 8px 0 4px; height: 56px;">
+    <a href="V2Review.dc.html" aria-label="Back" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #1D1A33;"><span class="msr" aria-hidden="true" style="font-size: 24px;">arrow_back</span></a>
+  </div>
+
+  <div style="padding: 4px 20px 18px; display: flex; flex-direction: column; gap: 6px;">
+    <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5E587A;">The verdict</span>
+    <h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 800; font-size: 34px; line-height: 1.05;">{{headA}} <span style="font-style: italic; font-weight: 500; color: #C23C72;">{{headB}}</span></h1>
+  </div>
+
+  <div style="padding: 0 16px;">
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+      <span style="font-size: 12px; font-weight: 700; color: #5E587A; text-align: center;">It went well</span>
+      <span style="font-size: 12px; font-weight: 700; color: #5E587A; text-align: center;">It went badly</span>
+      <sc-for list="{{cells}}" as="c" hint-placeholder-count="4">
+        <button aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="position: relative; height: 158px; border: 0; border-radius: 24px; background: {{c.bg}}; box-shadow: {{c.shadow}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-family: 'Noto Sans', sans-serif; color: #1D1A33; cursor: pointer;">
+          <img src="{{c.art}}" alt="" aria-hidden="true" width="64" height="64" style="width: 64px; height: 64px; opacity: {{c.fade}};">
+          <span style="font-family: 'Fraunces', serif; font-weight: {{c.weight}}; font-size: 18px; color: {{c.ink}};">{{c.name}}</span>
+          <span style="font-size: 11px; color: #5E587A;">{{c.sub}}</span>
+          <sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}">
+            <span aria-hidden="true" style="position: absolute; right: 10px; top: 10px; width: 28px; height: 28px; border-radius: 14px; background: #C23C72; color: #FFFFFF; display: flex; align-items: center; justify-content: center;"><span class="msr" aria-hidden="true" style="font-size: 16px;">check</span></span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <p style="margin: 18px 20px 0; font-size: 15px; line-height: 1.5;">{{body}}</p>
+  <span style="margin: 6px 20px 0; font-size: 12px; color: #5E587A;">Suggested from your answers. Tap another square to change it.</span>
+
+  <div style="flex: 1;"></div>
+  <div style="padding: 0 16px 24px;">
+    <a href="V2Letters.dc.html" style="height: 56px; border-radius: 28px; background: #6E4FE6; color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; font-weight: 700; box-shadow: 0 12px 22px -10px rgba(78,52,190,0.6);">Stamp it: {{name}}</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { pick: 0 }; }
+  renderVals() {
+    var self = this;
+    var q = [
+      { art: 'img/1st-place-medal.png', name: 'Earned it', sub: 'Sound thinking', a: 'You', b: 'earned it.', body: 'Your reasons held up, and it went well. Worth remembering what you checked before buying.' },
+      { art: 'img/cloud-with-rain.png', name: 'Bad luck', sub: 'Sound thinking', a: 'Good thinking,', b: 'rough luck.', body: 'Keep the approach. Not every outcome is yours to control.' },
+      { art: 'img/four-leaf-clover.png', name: 'Lucky break', sub: 'Shaky thinking', a: 'A lucky', b: 'break.', body: 'It went well anyway. Worth knowing why it worked.' },
+      { art: 'img/light-bulb.png', name: 'Lesson', sub: 'Shaky thinking', a: 'A lesson,', b: 'kept.', body: 'This one taught you something. What would you check first next time?' }
+    ];
+    var p = q[this.state.pick];
+    return {
+      headA: p.a, headB: p.b, body: p.body, name: p.name,
+      cells: q.map(function (c, i) {
+        var on = i === self.state.pick;
+        return {
+          art: c.art, name: c.name, sub: c.sub, on: on, pressed: on ? 'true' : 'false',
+          bg: on ? '#FFFFFF' : '#EEEAF7', fade: on ? 1 : 0.55, weight: on ? 800 : 500, ink: on ? '#1D1A33' : '#5E587A',
+          shadow: on ? '0 0 0 2px #C23C72, 0 14px 24px -14px rgba(194,60,114,0.45)' : 'none',
+          pick: function () { self.setState({ pick: i }); }
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
