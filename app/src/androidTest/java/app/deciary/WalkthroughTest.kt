@@ -122,6 +122,10 @@ class WalkthroughTest {
         tap("See verdict")
         screenshot("verdict")
         tap("Stamp it: Earned it")
+        // Stamping lands on the opened letter, not on Home.
+        rule.waitForIdle()
+        rule.onNodeWithText("EARNED IT", useUnmergedTree = true).assertExists()
+        rule.onNodeWithText("WHAT HAPPENED", useUnmergedTree = true).assertExists()
         screenshot("letter-opened")
 
         // Shelf, settings, data

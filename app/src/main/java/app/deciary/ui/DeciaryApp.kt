@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -68,6 +69,17 @@ private object Routes {
     fun typo(id: String) = "typo/$id"
     fun review(id: String) = "review/$id"
     fun verdict(id: String) = "verdict/$id"
+}
+
+/**
+ * Leaves a screen whose letter or review is gone. Only pops when this screen is still on top:
+ * a screen on its way out (e.g. the verdict, right after stamping) must not pop the one replacing it.
+ */
+@Composable
+private fun LeaveIfMissing(nav: NavHostController, entry: NavBackStackEntry) {
+    LaunchedEffect(entry) {
+        if (nav.currentBackStackEntry?.id == entry.id) nav.popBackStack()
+    }
 }
 
 private fun NavHostController.goHome() = navigate(Routes.HOME) { popUpTo(graph.id) { inclusive = true } }
@@ -176,7 +188,7 @@ fun DeciaryApp(vm: AppViewModel) {
                     val id = entry.arguments?.getString("id").orEmpty()
                     val letter = letters.firstOrNull { it.id == id }
                     if (letter == null) {
-                        LaunchedEffect(Unit) { nav.popBackStack() }
+                        LeaveIfMissing(nav, entry)
                     } else {
                         LetterScreen(
                             letter = letter,
@@ -232,7 +244,7 @@ fun DeciaryApp(vm: AppViewModel) {
                             vm.stamp(verdict) { nav.navigate(Routes.letter(id)) { popUpTo(Routes.HOME) } }
                         }
                     } else {
-                        LaunchedEffect(Unit) { nav.popBackStack() }
+                        LeaveIfMissing(nav, entry)
                     }
                 }
                 composable(Routes.SHELF) {
