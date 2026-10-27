@@ -1,7 +1,6 @@
 package app.deciary
 
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.WindowManager
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -24,17 +23,10 @@ import app.deciary.ui.theme.DeciaryTheme
 class MainActivity : FragmentActivity() {
     private val vm: AppViewModel by viewModels()
 
-    /** Coming back within this window (e.g. from the file picker) doesn't re-lock. */
-    private val lockGraceMs = 15_000L
-    private var stoppedAt = 0L
-
+    /** Locks the diary whenever the app goes to the background, except for a trip to the file picker. */
     private val lockObserver = object : DefaultLifecycleObserver {
         override fun onStop(owner: LifecycleOwner) {
-            stoppedAt = SystemClock.elapsedRealtime()
-        }
-
-        override fun onStart(owner: LifecycleOwner) {
-            if (stoppedAt != 0L && SystemClock.elapsedRealtime() - stoppedAt > lockGraceMs) vm.lock()
+            if (vm.awayForPicker) vm.awayForPicker = false else vm.lock()
         }
     }
 

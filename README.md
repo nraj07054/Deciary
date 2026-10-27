@@ -13,12 +13,13 @@ This repository holds the **Android app** (Kotlin, Jetpack Compose) and the **v2
 
 A native Android app in Kotlin with Jetpack Compose and Material 3. Min SDK 26 (Android 8), target SDK 35.
 
+- **Portrait only**, as designed.
 - **Offline by design.** The app has no `INTERNET` permission, Android cloud backup is switched off, and letters live in one JSON file in the app's private storage.
 - **Writing a letter:** the decision and your choice (required), then your prediction and why, mood, when it opens, and how sure you are (50–100%). "Skip the rest" seals it at any point after the first step. Optional challenge questions come before sealing.
 - **Sealed means sealed.** The prediction and how sure you were are locked; a typo fix is allowed for 10 minutes.
 - **Opening a letter:** "Then & now" puts your prediction next to what happened, three quick questions suggest a verdict (Earned it, Bad luck, Lucky break, Lesson), and you stamp it.
 - **Your shelf:** all letters by month, filtered by sealed or opened.
-- **Lock:** optional 4-digit PIN (salted PBKDF2 hash) and fingerprint. The diary locks when you tap the snap or leave the app for more than 15 seconds, and is hidden from the recent-apps preview while the lock is on.
+- **Lock:** optional 4-digit PIN (salted PBKDF2 hash). With it on, the fingerprint is offered whenever the phone has one set up. The diary locks when you tap the cover and every time you leave the app (except for the backup file picker), each letter asks for the fingerprint or PIN again before it shows, and the app is hidden from the recent-apps preview.
 - **Reminders:** a daily check at the hour you pick (WorkManager). Notifications never show a letter's title.
 - **Your data:** backups are one file encrypted with a password you choose (AES-GCM, PBKDF2 key). Restore, and delete everything (PIN plus typing DELETE). There is no unencrypted export, so your letters never leave the phone as readable text.
 - **Safety:** if a letter's words suggest someone may be in crisis, a calm sheet offers the Tele-MANAS helpline (14416) and switches challenge questions off. Saving is never blocked.
@@ -75,7 +76,7 @@ The `.dc.html` files are Design Component sources made for the claude.ai design 
 
 - **Colours:** lilac paper `#F5F2FB`, deep violet ink `#1D1A33`, violet accent `#6E4FE6`, rose seals `#C23C72`.
 - **Type:** Fraunces for headings, Noto Sans for text.
-- **Diary cover:** stitched leather in Ink (rose-gold snap), Plum (silver snap) or Natural tan (brass snap). The name is pressed into the leather, and tapping the snap locks the diary.
+- **Diary cover:** stitched leather in Ink (rose-gold snap), Plum (silver snap) or Natural tan (brass snap). The name is pressed into the leather, and tapping the cover locks the diary.
 - **Icon:** a D-shaped envelope whose flap and seal read as clock hands.
 
 ## Credits

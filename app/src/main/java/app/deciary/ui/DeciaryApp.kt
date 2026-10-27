@@ -109,11 +109,10 @@ fun DeciaryApp(vm: AppViewModel) {
                         navArgument("onboarding") { type = NavType.BoolType; defaultValue = false },
                     ),
                 ) { entry ->
-                    val bio = entry.arguments?.getBoolean("bio") ?: false
                     val onboarding = entry.arguments?.getBoolean("onboarding") ?: false
                     val next = { if (onboarding) nav.navigate(Routes.cover(true)) else nav.popBackStack() }
                     PinSetupScreen(prefs.leather, onCancel = { next() }) { pin ->
-                        vm.setPin(pin, bio)
+                        vm.setPin(pin)
                         next()
                     }
                 }
@@ -135,6 +134,8 @@ fun DeciaryApp(vm: AppViewModel) {
                     }
                 }
                 composable(Routes.HOME) {
+                    // Back on the list, so the next letter opened asks again.
+                    LaunchedEffect(Unit) { vm.closeLetter() }
                     HomeScreen(
                         prefs = prefs,
                         letters = letters,
@@ -190,6 +191,16 @@ fun DeciaryApp(vm: AppViewModel) {
                     val letter = letters.firstOrNull { it.id == id }
                     if (letter == null) {
                         LeaveIfMissing(nav, entry)
+                    } else if (prefs.lockOn && vm.openLetterId != id) {
+                        // With the lock on, each letter asks for the fingerprint or PIN again before it shows.
+                        LockScreen(
+                            name = "Your letter",
+                            leather = prefs.leather,
+                            subtitle = "Confirm it's you to read it",
+                            onPin = { pin -> vm.checkPin(pin).also { if (it) vm.unlockLetter(id) } },
+                            onBiometric = { vm.unlockLetter(id) },
+                            pinWaitMs = vm::pinWaitMs,
+                        )
                     } else {
                         LetterScreen(
                             letter = letter,
@@ -249,6 +260,7 @@ fun DeciaryApp(vm: AppViewModel) {
                     }
                 }
                 composable(Routes.SHELF) {
+                    LaunchedEffect(Unit) { vm.closeLetter() }
                     ShelfScreen(letters, onBack = { nav.popBackStack() }, onOpen = { nav.navigate(Routes.letter(it)) })
                 }
                 composable(Routes.SETTINGS) {
@@ -260,7 +272,6 @@ fun DeciaryApp(vm: AppViewModel) {
                             onData = { nav.navigate(Routes.DATA) },
                             onLockOn = { nav.navigate(Routes.pinSetup(bio = false, onboarding = false)) },
                             onLockOff = { pin -> vm.checkPin(pin).also { if (it) vm.turnLockOff() } },
-                            onBiometric = vm::setBiometric,
                             onReminders = vm::setReminders,
                             onReminderHour = vm::setReminderHour,
                             onReviewMonths = vm::setReviewMonths,
@@ -279,6 +290,7 @@ fun DeciaryApp(vm: AppViewModel) {
                             restore = vm::restore,
                             checkPin = vm::checkPin,
                             pinWaitMs = vm::pinWaitMs,
+                            beforePicker = { vm.awayForPicker = true },
                             deleteEverything = { vm.deleteEverything { nav.navigate(Routes.WELCOME) { popUpTo(nav.graph.id) { inclusive = true } } } },
                         ),
                     )
@@ -289,7 +301,6 @@ fun DeciaryApp(vm: AppViewModel) {
             LockScreen(
                 name = prefs.coverName,
                 leather = prefs.leather,
-                biometric = prefs.biometric,
                 onPin = vm::tryUnlock,
                 onBiometric = vm::unlockWithBiometric,
                 pinWaitMs = vm::pinWaitMs,

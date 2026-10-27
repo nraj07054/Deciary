@@ -1,5 +1,16 @@
 package app.deciary.ui.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.runtime.remember
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -116,7 +127,7 @@ fun HomeScreen(
                     PlainIcon(Icons.Outlined.Tune, "Settings", onClick = onSettings)
                 }
             }
-            DiaryCover(prefs.coverName, prefs.leather, Modifier.padding(start = 16.dp, end = 16.dp, top = if (empty) 8.dp else 6.dp), onSnap = if (prefs.lockOn) onLock else null)
+            DiaryCover(prefs.coverName, prefs.leather, Modifier.padding(start = 16.dp, end = 16.dp, top = if (empty) 8.dp else 6.dp), onLock = if (prefs.lockOn) onLock else null)
 
             if (empty) {
                 EmptyCard()
@@ -229,18 +240,52 @@ private fun RoundIcon(icon: ImageVector, label: String, onClick: () -> Unit) {
     ) { Icon(icon, null, tint = c.ink, modifier = Modifier.size(20.dp)) }
 }
 
+/**
+ * A title that can be frosted over for privacy. The words melt into a soft violet haze, animating both
+ * ways; Android 11 and older can't blur, so they get soft frosted bars over each line instead.
+ */
 @Composable
-private fun BlurText(text: String, blurred: Boolean, style: androidx.compose.ui.text.TextStyle, maxLines: Int = 2) {
+private fun BlurText(
+    text: String,
+    blurred: Boolean,
+    style: androidx.compose.ui.text.TextStyle,
+    maxLines: Int = 2,
+    color: Color = Deciary.colors.ink,
+) {
     val c = Deciary.colors
-    // Blur needs Android 12; older phones get dots instead so the title still can't be read.
-    val shown = if (blurred && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) "•".repeat(text.length.coerceAtMost(28)) else text
+    val radius by animateDpAsState(if (blurred) 9.dp else 0.dp, tween(360), label = "blur")
+    val ink by animateColorAsState(if (blurred) c.accent.copy(alpha = 0.6f) else color, tween(360), label = "haze")
+    val bars = blurred && Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val frost = Brush.horizontalGradient(listOf(c.accent.copy(alpha = 0.28f), c.accent.copy(alpha = 0.12f)))
     Text(
-        shown,
+        text,
         style = style,
-        color = c.ink,
+        color = ink,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        modifier = if (blurred) Modifier.blur(7.dp) else Modifier,
+        onTextLayout = { layout = it },
+        modifier = Modifier
+            .then(if (radius > 0.dp) Modifier.blur(radius, BlurredEdgeTreatment.Unbounded) else Modifier)
+            .then(
+                if (bars) {
+                    Modifier.drawWithContent {
+                        val l = layout ?: return@drawWithContent
+                        for (line in 0 until l.lineCount) {
+                            val top = l.getLineTop(line)
+                            val h = l.getLineBottom(line) - top
+                            drawRoundRect(
+                                frost,
+                                topLeft = Offset(l.getLineLeft(line), top + h * 0.18f),
+                                size = Size(l.getLineRight(line) - l.getLineLeft(line), h * 0.64f),
+                                cornerRadius = CornerRadius(h * 0.32f),
+                            )
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     )
 }
 
@@ -276,7 +321,7 @@ private fun DueCard(due: List<Letter>, blurred: Boolean, onOpen: () -> Unit) {
                     val heading = Type.heading.copy(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 25.sp)
                     if (many) {
                         Text("${due.size} letters have arrived", style = heading, color = c.ink)
-                        Text("Oldest first: ${first.title}", style = Type.small, color = c.inkQuiet, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.then(if (blurred) Modifier.blur(7.dp) else Modifier))
+                        BlurText("Oldest first: ${first.title}", blurred, Type.small, color = c.inkQuiet)
                     } else {
                         Text("A letter from past you", style = Type.small, color = c.inkQuiet)
                         BlurText(first.title, blurred, heading, maxLines = 3)

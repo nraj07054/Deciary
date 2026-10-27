@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Notifications
@@ -81,7 +80,6 @@ class SettingsActions(
     val onData: () -> Unit,
     val onLockOn: () -> Unit,
     val onLockOff: (pin: String) -> Boolean,
-    val onBiometric: (Boolean) -> Unit,
     val onReminders: (Boolean) -> Unit,
     val onReminderHour: (Int) -> Unit,
     val onReviewMonths: (Int) -> Unit,
@@ -141,13 +139,9 @@ fun SettingsScreen(prefs: Prefs, a: SettingsActions) {
                 Group("Privacy") {
                     ToggleRow(
                         Icons.Rounded.Lock, Color(0xFFFDF0F5), c.wax, "App lock",
-                        if (prefs.lockOn) (if (prefs.biometric) "PIN and fingerprint" else "PIN") else "Off",
+                        if (prefs.lockOn) (if (Biometrics.available(context)) "PIN and fingerprint" else "PIN") else "Off",
                         prefs.lockOn,
                     ) { on -> if (on) a.onLockOn() else dialog = Dialog.LockOff }
-                    if (prefs.lockOn && Biometrics.available(context)) {
-                        Divider()
-                        ToggleRow(Icons.Rounded.Fingerprint, Color(0xFFEDE7FD), c.accent, "Fingerprint", if (prefs.biometric) "On" else "Off", prefs.biometric, a.onBiometric)
-                    }
                     Divider()
                     LinkRow(
                         Icons.Rounded.Inventory2, Color(0xFFEDE7FD), c.accent, "Your data",

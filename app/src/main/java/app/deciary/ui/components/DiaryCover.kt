@@ -3,17 +3,14 @@ package app.deciary.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -48,22 +45,23 @@ private fun coverShape(left: Dp, right: Dp) = RoundedCornerShape(topStart = left
 
 /**
  * The diary cover: leather with a spine, stitching, the owner's name pressed in and a strap with a snap.
- * It is 150 dp tall at any width, as in the design. When [onSnap] is set, tapping the snap locks the diary.
+ * It is 150 dp tall at any width, as in the design. When [onLock] is set, tapping the cover locks the diary.
  */
 @Composable
 fun DiaryCover(
     name: String,
     leather: Leather,
     modifier: Modifier = Modifier,
-    onSnap: (() -> Unit)? = null,
+    onLock: (() -> Unit)? = null,
 ) {
     val p = leather.palette()
     val shape = coverShape(10.dp, 26.dp)
     val density = LocalDensity.current
-    BoxWithConstraints(
+    Box(
         modifier.fillMaxWidth().height(150.dp)
             .shadow(22.dp, shape, ambientColor = Color(0x991D1A33), spotColor = Color(0x991D1A33))
-            .clip(shape),
+            .clip(shape)
+            .then(if (onLock != null) Modifier.semantics { contentDescription = "Lock the diary" }.clickable(onClick = onLock) else Modifier),
     ) {
         Canvas(Modifier.matchParentSize()) { drawCover(p, strap = true) }
         val nameStyle = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.ExtraBold, fontSize = with(density) { 44.dp.toSp() }, letterSpacing = with(density) { (-1).dp.toSp() })
@@ -79,9 +77,6 @@ fun DiaryCover(
             color = p.ink.copy(alpha = 0.85f),
             modifier = Modifier.padding(start = 41.dp).offset(y = 96.dp),
         )
-        // The snap sits 84 dp in from the right edge, centred on the strap.
-        val snap = Modifier.align(Alignment.CenterEnd).padding(end = 60.dp).size(48.dp).clip(CircleShape)
-        Box(if (onSnap != null) snap.semantics { contentDescription = "Lock the diary" }.clickable(onClick = onSnap) else snap)
     }
 }
 

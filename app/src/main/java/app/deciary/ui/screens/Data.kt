@@ -83,6 +83,8 @@ class DataActions(
     val checkPin: (String) -> Boolean,
     val deleteEverything: () -> Unit,
     val pinWaitMs: () -> Long = { 0L },
+    /** Called just before the system file picker opens, so returning from it doesn't lock the app. */
+    val beforePicker: () -> Unit = {},
 )
 
 private sealed interface DataDialog {
@@ -169,6 +171,7 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
                 val list = RoundedCornerShape(22.dp)
                 Column(Modifier.fillMaxWidth().shadow(10.dp, list, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(list).background(c.surface).padding(horizontal = 14.dp)) {
                     ActionRow(Icons.Rounded.Download, Color(0xFFE8F1FD), Color(0xFF2F6FD0), "Restore from a backup", "Needs the backup password") {
+                        a.beforePicker()
                         openBackup.launch(arrayOf("*/*"))
                     }
                 }
@@ -204,12 +207,13 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
         ) { pw ->
             backupPassword = pw
             dialog = DataDialog.None
+            a.beforePicker()
             createBackup.launch("deciary-backup-$stamp.deciary")
         }
         is DataDialog.RestorePassword -> RestoreSheet(
             uri = d.uri,
             wrong = d.wrong,
-            onChange = { dialog = DataDialog.None; openBackup.launch(arrayOf("*/*")) },
+            onChange = { dialog = DataDialog.None; a.beforePicker(); openBackup.launch(arrayOf("*/*")) },
             onDismiss = { dialog = DataDialog.None },
         ) { pw ->
             dialog = DataDialog.None

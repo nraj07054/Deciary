@@ -200,10 +200,10 @@ fun waitLabel(ms: Long): String {
 fun LockScreen(
     name: String,
     leather: Leather,
-    biometric: Boolean,
     onPin: (String) -> Boolean,
     onBiometric: () -> Unit,
     pinWaitMs: () -> Long = { 0L },
+    subtitle: String = "Only you can open this",
 ) {
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
@@ -217,12 +217,13 @@ fun LockScreen(
             wait = pinWaitMs()
         }
     }
-    val canBio = biometric && Biometrics.available(context)
+    // Whenever the phone has a fingerprint set up, offer it straight away; the PIN is always there too.
+    val canBio = Biometrics.available(context)
     LaunchedEffect(Unit) { if (canBio) Biometrics.prompt(context, onBiometric) }
     PinPad(
         leather = leather,
         title = name,
-        subtitle = "Only you can open this",
+        subtitle = subtitle,
         prompt = "Enter your PIN",
         error = if (wait > 0) "Too many tries. Try again in ${waitLabel(wait)}." else error,
         blocked = wait > 0,

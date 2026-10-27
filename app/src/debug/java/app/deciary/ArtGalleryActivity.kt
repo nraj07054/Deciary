@@ -124,7 +124,7 @@ private fun ScreenPreview(screen: String) {
         "shelf" -> app.deciary.ui.screens.ShelfScreen(Samples.letters, {}, {})
         "settings" -> app.deciary.ui.screens.SettingsScreen(
             Samples.prefs,
-            app.deciary.ui.screens.SettingsActions({}, {}, {}, {}, { false }, {}, {}, {}, {}, {}),
+            app.deciary.ui.screens.SettingsActions({}, {}, {}, {}, { false }, {}, {}, {}, {}),
         )
         "data" -> app.deciary.ui.screens.DataScreen(
             Samples.prefs, 8,

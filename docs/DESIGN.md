@@ -43,7 +43,7 @@ Mood colours (always shown with the word): Calm `#2F9C95`, Rushed `#E5674F`, Anx
 | Plum | `#5B3FB0` | Silver |
 | Natural tan | `#A8693A` | Brass |
 
-The cover shows the person's name pressed into the leather and "Only you can open this". The snap is a lock button. The lock screen is the same leather, closed. `design/tools/leathergen.py` draws the cover.
+The cover shows the person's name pressed into the leather and "Only you can open this". Tapping the cover locks the diary. The lock screen is the same leather, closed. `design/tools/leathergen.py` draws the cover.
 
 ## Type, shape and icons
 
