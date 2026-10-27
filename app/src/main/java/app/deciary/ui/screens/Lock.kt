@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
+import app.deciary.ui.components.LightBarIcons
 import app.deciary.ui.components.drawCover
 import app.deciary.ui.theme.Fraunces
 import androidx.compose.animation.core.spring
@@ -85,6 +86,7 @@ fun PinPad(
     blocked: Boolean = false,
 ) {
     val p = leather.palette()
+    LightBarIcons()
     var pin by remember { mutableStateOf("") }
     val shake = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()

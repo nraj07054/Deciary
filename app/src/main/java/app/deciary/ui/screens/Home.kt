@@ -327,6 +327,6 @@ private fun Step(label: String, modifier: Modifier, art: @Composable () -> Unit)
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         art()
-        Text(label, style = Type.small.copy(fontWeight = FontWeight.Bold), color = c.ink, maxLines = 1, softWrap = false)
+        Text(label, style = Type.small.copy(fontWeight = FontWeight.Bold), color = c.ink, maxLines = 2, textAlign = TextAlign.Center)
     }
 }

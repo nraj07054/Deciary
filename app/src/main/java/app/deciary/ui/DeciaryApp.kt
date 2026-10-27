@@ -277,8 +277,6 @@ fun DeciaryApp(vm: AppViewModel) {
                             onBack = { nav.popBackStack() },
                             backup = vm::backup,
                             restore = vm::restore,
-                            exportJson = vm::exportJson,
-                            exportCsv = vm::exportCsv,
                             checkPin = vm::checkPin,
                             pinWaitMs = vm::pinWaitMs,
                             deleteEverything = { vm.deleteEverything { nav.navigate(Routes.WELCOME) { popUpTo(nav.graph.id) { inclusive = true } } } },

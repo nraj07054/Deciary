@@ -8,10 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.rounded.DataObject
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.TableChart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -82,8 +80,6 @@ class DataActions(
     val onBack: () -> Unit,
     val backup: suspend (Uri, String) -> Result<Unit>,
     val restore: suspend (Uri, String) -> Result<Int>,
-    val exportJson: suspend (Uri) -> Result<Unit>,
-    val exportCsv: suspend (Uri) -> Result<Unit>,
     val checkPin: (String) -> Boolean,
     val deleteEverything: () -> Unit,
     val pinWaitMs: () -> Long = { 0L },
@@ -131,19 +127,6 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
     val openBackup = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) dialog = DataDialog.RestorePassword(uri)
     }
-    val createJson = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        if (uri != null) work {
-            val r = a.exportJson(uri)
-            dialog = if (r.isSuccess) DataDialog.Message("Exported", "Saved as JSON. This file isn't locked, so anyone with it can read your letters.") else failed(r.exceptionOrNull())
-        }
-    }
-    val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
-        if (uri != null) work {
-            val r = a.exportCsv(uri)
-            dialog = if (r.isSuccess) DataDialog.Message("Exported", "Saved as CSV. This file isn't locked, so anyone with it can read your letters.") else failed(r.exceptionOrNull())
-        }
-    }
-
     Column(Modifier.fillMaxSize().background(c.bg)) {
         TopBar(onBack = a.onBack)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).navigationBarsPadding()) {
@@ -187,14 +170,6 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
                 Column(Modifier.fillMaxWidth().shadow(10.dp, list, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(list).background(c.surface).padding(horizontal = 14.dp)) {
                     ActionRow(Icons.Rounded.Download, Color(0xFFE8F1FD), Color(0xFF2F6FD0), "Restore from a backup", "Needs the backup password") {
                         openBackup.launch(arrayOf("*/*"))
-                    }
-                    HorizontalDivider(color = c.line)
-                    ActionRow(Icons.Rounded.DataObject, Color(0xFFEDE7FD), c.accent, "Export as JSON", "For moving to another app") {
-                        createJson.launch("deciary-$stamp.json")
-                    }
-                    HorizontalDivider(color = c.line)
-                    ActionRow(Icons.Rounded.TableChart, Color(0xFFE3F5EF), Color(0xFF2F9C7A), "Export as CSV", "Opens in any spreadsheet") {
-                        createCsv.launch("deciary-$stamp.csv")
                     }
                 }
 

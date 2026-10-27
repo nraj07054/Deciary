@@ -11,6 +11,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -93,6 +96,8 @@ private fun noto(weight: Int) = Font(
 val Fraunces = FontFamily(fraunces(400), fraunces(500), fraunces(600), fraunces(700), fraunces(800))
 val NotoSans = FontFamily(noto(400), noto(500), noto(600), noto(700), noto(800))
 
+private const val DESIGN_WIDTH_DP = 380
+
 private val LocalColors = staticCompositionLocalOf { LightColors }
 
 object Deciary {
@@ -139,7 +144,12 @@ fun DeciaryTheme(choice: ThemeChoice = ThemeChoice.System, content: @Composable 
         bodyLarge = Type.body, bodyMedium = Type.body, bodySmall = Type.small,
         labelLarge = Type.button, titleLarge = Type.heading, headlineSmall = Type.heading,
     )
-    CompositionLocalProvider(LocalColors provides c) {
+    // The design is drawn for phones about 380 dp wide. On narrower ones (many 720p phones are 360 dp)
+    // shrink everything a little, evenly, so text and cards keep the design's proportions instead of crowding.
+    val density = LocalDensity.current
+    val width = LocalConfiguration.current.screenWidthDp
+    val scaled = if (width in 1 until DESIGN_WIDTH_DP) Density(density.density * width / DESIGN_WIDTH_DP, density.fontScale) else density
+    CompositionLocalProvider(LocalColors provides c, LocalDensity provides scaled) {
         MaterialTheme(colorScheme = scheme, typography = typography, content = content)
     }
 }

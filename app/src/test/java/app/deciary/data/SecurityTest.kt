@@ -100,11 +100,4 @@ class SecurityTest {
         val v1 = """{"format":"deciary-backup","version":1,"salt":"${b.encodeToString(salt)}","iv":"${b.encodeToString(iv)}","data":"${b.encodeToString(data)}"}"""
         assertEquals(listOf(letter()), Backup.decrypt(v1, "old pass"))
     }
-
-    @Test fun csvCellsCantRunAsFormulas() {
-        val csv = Backup.exportCsv(listOf(letter(why = "=HYPERLINK(\"http://x\")"), letter("b", why = "+1 more"), letter("c", why = "-ish")))
-        assertTrue(csv.contains("\"'=HYPERLINK(\"\"http://x\"\")\""))
-        assertTrue(csv.contains(",'+1 more,"))
-        assertTrue(csv.contains(",'-ish,"))
-    }
 }

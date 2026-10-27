@@ -20,7 +20,7 @@ A native Android app in Kotlin with Jetpack Compose and Material 3. Min SDK 26 (
 - **Your shelf:** all letters by month, filtered by sealed or opened.
 - **Lock:** optional 4-digit PIN (salted PBKDF2 hash) and fingerprint. The diary locks when you tap the snap or leave the app for more than 15 seconds, and is hidden from the recent-apps preview while the lock is on.
 - **Reminders:** a daily check at the hour you pick (WorkManager). Notifications never show a letter's title.
-- **Your data:** backups are one file encrypted with a password you choose (AES-GCM, PBKDF2 key). Restore, export as JSON or CSV, and delete everything (PIN plus typing DELETE).
+- **Your data:** backups are one file encrypted with a password you choose (AES-GCM, PBKDF2 key). Restore, and delete everything (PIN plus typing DELETE). There is no unencrypted export, so your letters never leave the phone as readable text.
 - **Safety:** if a letter's words suggest someone may be in crisis, a calm sheet offers the Tele-MANAS helpline (14416) and switches challenge questions off. Saving is never blocked.
 - **Look:** the design's colour tokens in light and dark, Fraunces and Noto Sans bundled, stitched leather covers and soft 3D scene art drawn in Compose, Fluent Emoji for the four verdict objects.
 
@@ -30,7 +30,7 @@ Open the project in Android Studio (Ladybug or newer) and run the `app` configur
 
 ```sh
 ./gradlew assembleDebug        # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest    # unit tests for verdicts, backups, CSV and the safety check
+./gradlew testDebugUnitTest    # unit tests for verdicts, backups, encryption and the safety check
 ```
 
 Every push builds debug and release APKs on GitHub Actions (`.github/workflows/android.yml`); download them from the run's **deciary-apks** artifact. The release APK is signed with the debug key so it installs for testing; set up your own signing before publishing.
@@ -39,7 +39,7 @@ Every push builds debug and release APKs on GitHub Actions (`.github/workflows/a
 
 | Path | What it does |
 | --- | --- |
-| `app/src/main/java/app/deciary/data/` | Letter model, JSON store, settings and PIN, encrypted backup and export, safety check |
+| `app/src/main/java/app/deciary/data/` | Letter model, JSON store, settings and PIN, encrypted backup, safety check |
 | `app/src/main/java/app/deciary/ui/screens/` | One file per flow: welcome, cover, lock, home, write, seal, letter and review, shelf, settings, data |
 | `app/src/main/java/app/deciary/ui/components/` | Leather cover, snap, wax seal, buttons, cards, chips |
 | `app/src/main/java/app/deciary/ui/theme/` | Colour tokens, mood colours and type |

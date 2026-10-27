@@ -2,9 +2,6 @@ package app.deciary.data
 
 import kotlinx.serialization.Serializable
 import java.security.SecureRandom
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Base64
 import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
@@ -82,40 +79,4 @@ object Backup {
         val bytes = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
         return SecretKeySpec(bytes, "AES")
     }
-
-    /** Plain, readable JSON for moving to another app. */
-    fun exportJson(letters: List<Letter>): String = kotlinx.serialization.json.Json {
-        prettyPrint = true
-        encodeDefaults = true
-    }.encodeToString(LetterStore.serializer, letters)
-
-    fun exportCsv(letters: List<Letter>): String {
-        val day = DateTimeFormatter.ISO_LOCAL_DATE
-        val header = listOf(
-            "question", "choice", "prediction", "why", "mood", "confidence", "sealed", "opens",
-            "what_happened", "compared", "came_true", "same_again", "lesson", "verdict", "opened",
-        )
-        val rows = letters.map { l ->
-            val r = l.review
-            listOf(
-                l.question, l.choice, l.prediction, l.why, l.mood?.label.orEmpty(), l.confidence?.toString().orEmpty(),
-                l.sealedDate.format(day), l.opensDate.format(day),
-                r?.whatHappened.orEmpty(), r?.compared?.label.orEmpty(), r?.cameTrue?.label.orEmpty(),
-                r?.sameAgain?.label.orEmpty(), r?.lesson.orEmpty(), r?.verdict?.label.orEmpty(),
-                r?.let { Instant.ofEpochMilli(it.openedAt).atZone(ZoneId.systemDefault()).toLocalDate().format(day) }.orEmpty(),
-            )
-        }
-        return (listOf(header) + rows).joinToString("\r\n") { row -> row.joinToString(",") { csvCell(it) } }
-    }
-
-    /**
-     * Quotes awkward cells, and starts any cell a spreadsheet would run as a formula
-     * (=, +, -, @, tab or return first) with an apostrophe, so it shows as plain text.
-     */
-    private fun csvCell(raw: String): String {
-        val value = if (raw.isNotEmpty() && raw[0] in FORMULA_STARTS) "'$raw" else raw
-        return if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + value.replace("\"", "\"\"") + "\"" else value
-    }
-
-    private val FORMULA_STARTS = charArrayOf('=', '+', '-', '@', '\t', '\r')
 }

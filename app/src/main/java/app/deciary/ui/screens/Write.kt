@@ -98,7 +98,7 @@ fun WriteScreen(
     val c = Deciary.colors
     BackHandler { if (step > 0) onStep(step - 1) else onClose() }
     Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().imePadding().navigationBarsPadding()) {
-        Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 4.dp, end = 10.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 4.dp, end = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) { Icon(Icons.Rounded.Close, contentDescription = "Close", tint = c.ink, modifier = Modifier.size(22.dp)) }
             Spacer(Modifier.width(10.dp))
             // One continuous bar, filled to the current step.
@@ -108,7 +108,7 @@ fun WriteScreen(
             ) {
                 Box(Modifier.fillMaxWidth((step + 1f) / STEPS).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(c.accent))
             }
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(14.dp))
             if (step > 0) {
                 Text(
                     "Skip the rest",

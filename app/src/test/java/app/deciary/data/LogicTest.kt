@@ -55,15 +55,6 @@ class LogicTest {
         Backup.decrypt("{\"hello\": 1}", "x")
     }
 
-    @Test fun csvQuotesAwkwardCells() {
-        val csv = Backup.exportCsv(listOf(letter()))
-        val lines = csv.split("\r\n")
-        assertTrue(lines[0].startsWith("question,choice,prediction"))
-        assertTrue(csv.contains("\"Yes, \"\"finally\"\"\""))
-        assertTrue(csv.contains("\"I'll be glad, mostly\""))
-        assertTrue(csv.contains("\"Line one\nline two\""))
-    }
-
     @Test fun safetyCheck() {
         assertTrue(Safety.needsCare("Should I quit", "I don’t want to live like this"))
         assertTrue(Safety.needsCare("I keep thinking about suicide"))

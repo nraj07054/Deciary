@@ -199,10 +199,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         restored.size
     }
 
-    suspend fun exportJson(uri: Uri): Result<Unit> = io { write(uri, Backup.exportJson(letters.value)) }
-
-    suspend fun exportCsv(uri: Uri): Result<Unit> = io { write(uri, Backup.exportCsv(letters.value)) }
-
     fun deleteEverything(onDone: () -> Unit) {
         viewModelScope.launch {
             store.clear()

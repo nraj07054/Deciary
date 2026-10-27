@@ -1,5 +1,6 @@
 package app.deciary.ui.components
 
+import android.app.Activity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -35,9 +36,12 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -389,3 +393,21 @@ fun WaxSeal(initial: String, size: Dp, modifier: Modifier = Modifier) {
 }
 
 fun initialOf(name: String): String = name.trim().firstOrNull()?.uppercase() ?: "D"
+
+/** Light status and navigation bar icons while this screen shows, for screens drawn on a dark background. */
+@Composable
+fun LightBarIcons() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val window = (view.context as? Activity)?.window ?: return@DisposableEffect onDispose { }
+        val bars = WindowCompat.getInsetsController(window, view)
+        val status = bars.isAppearanceLightStatusBars
+        val nav = bars.isAppearanceLightNavigationBars
+        bars.isAppearanceLightStatusBars = false
+        bars.isAppearanceLightNavigationBars = false
+        onDispose {
+            bars.isAppearanceLightStatusBars = status
+            bars.isAppearanceLightNavigationBars = nav
+        }
+    }
+}

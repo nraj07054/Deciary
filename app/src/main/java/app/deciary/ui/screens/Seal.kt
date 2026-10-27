@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import app.deciary.ui.components.LightBarIcons
 import app.deciary.ui.components.BalanceArt
 import app.deciary.ui.components.EnvelopeArt
 import app.deciary.ui.components.EyeArt
@@ -235,6 +236,7 @@ fun SealedScreen(letter: Letter?, prefs: Prefs, onDone: () -> Unit) {
     val c = Deciary.colors
     val context = LocalContext.current
     val drop = remember { Animatable(2.2f) }
+    LightBarIcons()
     LaunchedEffect(Unit) { drop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) }
 
     // The first sealed letter is a good moment to ask for notifications: the reason is obvious.

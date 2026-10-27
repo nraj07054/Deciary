@@ -2,6 +2,8 @@ package app.deciary
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +48,9 @@ import app.deciary.ui.theme.Type
 /** Debug only: shows every drawn illustration at a large and a small size. Launch with `am start -n app.deciary/.ArtGalleryActivity`. */
 class ArtGalleryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Same bars as the app's light theme, so previews show what the app shows.
+        val bars = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        enableEdgeToEdge(bars, bars)
         super.onCreate(savedInstanceState)
         val tint = Color(0xFFEDE7FD)
         val pieces: List<Pair<String, @Composable () -> Unit>> = listOf(
@@ -123,7 +128,7 @@ private fun ScreenPreview(screen: String) {
         )
         "data" -> app.deciary.ui.screens.DataScreen(
             Samples.prefs, 8,
-            app.deciary.ui.screens.DataActions({}, { _, _ -> Result.success(Unit) }, { _, _ -> Result.success(0) }, { Result.success(Unit) }, { Result.success(Unit) }, { false }, {}),
+            app.deciary.ui.screens.DataActions({}, { _, _ -> Result.success(Unit) }, { _, _ -> Result.success(0) }, { false }, {}),
         )
         "safety" -> androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize().background(app.deciary.ui.theme.Deciary.colors.bg)) { app.deciary.ui.screens.SafetySheet({}, {}) }
         "challenge" -> app.deciary.ui.screens.ChallengeScreen(95, {}, {}, {})
