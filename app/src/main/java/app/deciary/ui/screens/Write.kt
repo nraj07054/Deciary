@@ -1,6 +1,26 @@
 package app.deciary.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import app.deciary.ui.components.CrystalBallArt
+import app.deciary.ui.components.LabeledField
+import app.deciary.ui.components.TwoToneTitle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,8 +46,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -48,14 +66,10 @@ import androidx.compose.ui.unit.sp
 import app.deciary.Draft
 import app.deciary.data.Mood
 import app.deciary.data.confidenceWord
-import app.deciary.ui.components.Card
 import app.deciary.ui.components.Chip
-import app.deciary.ui.components.Field
 import app.deciary.ui.components.Kicker
 import app.deciary.ui.components.PrimaryButton
 import app.deciary.ui.components.QuietButton
-import app.deciary.ui.components.SecondaryButton
-import app.deciary.ui.components.TopBar
 import app.deciary.ui.friendly
 import app.deciary.ui.theme.Deciary
 import app.deciary.ui.theme.Type
@@ -83,33 +97,43 @@ fun WriteScreen(
 ) {
     val c = Deciary.colors
     BackHandler { if (step > 0) onStep(step - 1) else onClose() }
-    Column(Modifier.fillMaxSize().background(c.bg).imePadding().navigationBarsPadding()) {
-        TopBar(onBack = onClose, backIcon = Icons.Rounded.Close, backLabel = "Close") {
-            if (step > 0) QuietButton("Skip the rest", onClick = onSeal, color = c.inkQuiet)
-        }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            repeat(STEPS) { n ->
-                Box(Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(if (n <= step) c.accent else c.line))
+    Column(Modifier.fillMaxSize().background(c.bg).statusBarsPadding().imePadding().navigationBarsPadding()) {
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 4.dp, end = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) { Icon(Icons.Rounded.Close, contentDescription = "Close", tint = c.ink, modifier = Modifier.size(22.dp)) }
+            Spacer(Modifier.width(10.dp))
+            // One continuous bar, filled to the current step.
+            Box(
+                Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)).background(c.line)
+                    .semantics { contentDescription = "Step ${step + 1} of $STEPS" },
+            ) {
+                Box(Modifier.fillMaxWidth((step + 1f) / STEPS).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(c.accent))
+            }
+            Spacer(Modifier.width(14.dp))
+            if (step > 0) {
+                Text(
+                    "Skip the rest",
+                    style = Type.small.copy(fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline),
+                    color = c.accentText,
+                    modifier = Modifier.heightIn(min = 44.dp).clickable(role = Role.Button, onClick = onSeal).padding(vertical = 13.dp),
+                )
             }
         }
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 20.dp),
-        ) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             when (step) {
                 0 -> StepDecision(draft, onDraft)
                 1 -> StepPrediction(draft, onDraft)
                 2 -> StepWhen(draft, onDraft)
                 else -> StepSure(draft, onDraft)
             }
+            Spacer(Modifier.height(20.dp))
         }
-        Column(Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             when (step) {
                 0 -> PrimaryButton("Next", onClick = { onStep(1) }, enabled = draft.question.isNotBlank() && draft.choice.isNotBlank())
                 1, 2 -> PrimaryButton("Next", onClick = { onStep(step + 1) })
                 else -> {
                     PrimaryButton("Seal it", onClick = onSeal)
-                    Spacer(Modifier.height(10.dp))
-                    SecondaryButton("Challenge me first", onClick = onChallenge)
+                    QuietButton("Challenge me first", onClick = onChallenge, modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
         }
@@ -117,30 +141,33 @@ fun WriteScreen(
 }
 
 @Composable
-private fun StepTitle(title: String, sub: String) {
-    Text(title, style = Type.title, color = Deciary.colors.ink)
-    Spacer(Modifier.height(6.dp))
-    Text(sub, style = Type.body, color = Deciary.colors.inkQuiet)
-    Spacer(Modifier.height(22.dp))
+private fun StepTitle(a: String, b: String, sub: String) {
+    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        TwoToneTitle(a, b, style = Type.display.copy(fontSize = 32.sp, lineHeight = 35.sp))
+        Text(sub, style = Type.body, color = Deciary.colors.inkQuiet)
+    }
 }
 
 @Composable
 private fun StepDecision(d: Draft, onDraft: (Draft) -> Unit) {
-    StepTitle("What are you deciding?", "Just the question and your choice. The rest can wait.")
-    Field(d.question, { onDraft(d.copy(question = it)) }, "The decision", placeholder = "Accept the Pune job offer?", minLines = 2)
-    Spacer(Modifier.height(16.dp))
-    Field(d.choice, { onDraft(d.copy(choice = it)) }, "What you chose", placeholder = "Yes, I'm taking it", minLines = 2)
+    StepTitle("What are you", "deciding?", "Just the question and your choice. The rest can wait.")
+    Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LabeledField("The decision", d.question, { onDraft(d.copy(question = it)) }, placeholder = "Accept the Pune job offer?", singleLine = false, minHeight = 84.dp)
+        LabeledField("What you chose", d.choice, { onDraft(d.copy(choice = it)) }, placeholder = "Yes, I'm taking it", singleLine = false, minHeight = 84.dp)
+    }
 }
 
 @Composable
 private fun StepPrediction(d: Draft, onDraft: (Draft) -> Unit) {
-    StepTitle("What do you expect?", "Write it to future you. Be specific, so you can tell later if it came true.")
-    Field(
-        d.prediction, { onDraft(d.copy(prediction = it)) }, "Your prediction",
-        placeholder = "By April I'll be settled in, and glad I moved.", minLines = 3, letterStyle = true,
-    )
-    Spacer(Modifier.height(16.dp))
-    Field(d.why, { onDraft(d.copy(why = it)) }, "Why you chose it · optional", minLines = 3)
+    StepTitle("What do you", "expect?", "Write it to future you. Be specific, so you can tell later if it came true.")
+    Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LabeledField(
+            "Your prediction", d.prediction, { onDraft(d.copy(prediction = it)) },
+            placeholder = "By April I'll be settled in, and glad I moved.", singleLine = false, minHeight = 120.dp,
+            textStyle = Type.letter.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 24.sp),
+        )
+        LabeledField("Why you chose it", d.why, { onDraft(d.copy(why = it)) }, suffix = "· optional", singleLine = false, minHeight = 110.dp)
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -148,7 +175,8 @@ private fun StepPrediction(d: Draft, onDraft: (Draft) -> Unit) {
 private fun StepWhen(d: Draft, onDraft: (Draft) -> Unit) {
     val c = Deciary.colors
     val today = LocalDate.now()
-    StepTitle("How do you feel, and when should it open?", "Both optional. Feelings change how we decide, so it helps to note them.")
+    StepTitle("How do you", "feel?", "And when should it open? Both optional. Feelings change how we decide, so it helps to note them.")
+    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp)) {
     Kicker("Right now I feel")
     Spacer(Modifier.height(10.dp))
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -196,6 +224,7 @@ private fun StepWhen(d: Draft, onDraft: (Draft) -> Unit) {
             dismissButton = { TextButton(onClick = { picking = false }) { Text("Cancel") } },
         ) { DatePicker(state) }
     }
+    }
 }
 
 private val notches = (50..100 step 5).toList()
@@ -204,33 +233,63 @@ private val notches = (50..100 step 5).toList()
 private fun StepSure(d: Draft, onDraft: (Draft) -> Unit) {
     val c = Deciary.colors
     val conf = d.confidence ?: 70
-    StepTitle("How sure are you?", "About your prediction. Once it's sealed, this is locked.")
+    StepTitle("How sure", "are you?", "About your prediction. Once it's sealed, this is locked.")
     if (d.prediction.isNotBlank()) {
-        Card(color = c.tint, padding = 18.dp) {
-            Kicker("You predicted")
-            Spacer(Modifier.height(6.dp))
-            Text(d.prediction, style = Type.letter, color = c.ink)
+        val shape = RoundedCornerShape(22.dp)
+        Row(
+            Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp).fillMaxWidth()
+                .shadow(10.dp, shape, ambientColor = Color(0x661D1A33), spotColor = Color(0x661D1A33)).clip(shape).background(c.surface)
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            CrystalBallArt(40.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("YOU PREDICTED", style = Type.label.copy(letterSpacing = 0.96.sp), color = c.inkQuiet)
+                Text(d.prediction, style = Type.letter.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 24.sp), color = c.ink)
+            }
         }
-        Spacer(Modifier.height(24.dp))
     }
-    Row(verticalAlignment = Alignment.Bottom) {
+    Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 34.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.rotate(if (conf >= 95) -2f else 0f)) {
+            Text("$conf", style = Type.display.copy(fontSize = 96.sp, lineHeight = 90.sp, letterSpacing = (-2.9).sp), color = c.ink)
+            Spacer(Modifier.width(4.dp))
+            Text("%", style = Type.display.copy(fontSize = 40.sp, lineHeight = 40.sp), color = c.ink, modifier = Modifier.padding(bottom = 8.dp))
+        }
+        Spacer(Modifier.height(6.dp))
         Text(
-            "$conf",
-            style = Type.display.copy(fontSize = 72.sp, lineHeight = 72.sp),
-            color = c.ink,
-            modifier = Modifier.rotate(if (conf >= 95) -2f else 0f),
+            confidenceWord(conf),
+            style = Type.body.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
+            color = if (c.isDark) c.accentText else Color(0xFF4A3A8C),
+            modifier = Modifier.clip(RoundedCornerShape(14.dp)).background(c.tint).padding(horizontal = 14.dp, vertical = 6.dp),
         )
-        Text("%", style = Type.title, color = c.ink, modifier = Modifier.padding(bottom = 10.dp))
-        Spacer(Modifier.width(14.dp))
-        Text(confidenceWord(conf), style = Type.heading.copy(fontWeight = FontWeight.Normal), color = c.accentText, modifier = Modifier.padding(bottom = 14.dp))
     }
-    Spacer(Modifier.height(14.dp))
-    Row(Modifier.fillMaxWidth().height(70.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+    // Notches you can tap or drag across, like the design's range slider.
+    fun pick(x: Float, width: Int) {
+        val i = ((x / width) * notches.size).toInt().coerceIn(0, notches.lastIndex)
+        if (notches[i] != conf) onDraft(d.copy(confidence = notches[i]))
+    }
+    Row(
+        Modifier
+            .padding(start = 20.dp, end = 20.dp, top = 28.dp)
+            .fillMaxWidth()
+            .height(64.dp)
+            .pointerInput(conf) {
+                detectHorizontalDragGestures { change, _ -> pick(change.position.x, size.width) }
+            }
+            .semantics {
+                contentDescription = "How sure are you"
+                stateDescription = "$conf percent, ${confidenceWord(conf)}"
+                progressBarRangeInfo = ProgressBarRangeInfo(conf.toFloat(), 50f..100f, steps = 9)
+                setProgress { v -> onDraft(d.copy(confidence = (Math.round(v / 5f) * 5).coerceIn(50, 100))); true }
+            },
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
         notches.forEachIndexed { i, v ->
             Box(
                 Modifier
                     .weight(1f)
-                    .heightIn(min = 48.dp)
+                    .fillMaxHeight()
                     .semantics { contentDescription = "$v percent, ${confidenceWord(v)}" }
                     .clickable { onDraft(d.copy(confidence = v)) },
                 contentAlignment = Alignment.BottomCenter,
@@ -239,7 +298,7 @@ private fun StepSure(d: Draft, onDraft: (Draft) -> Unit) {
                     Modifier
                         .fillMaxWidth()
                         .height((18 + i * 4.6f).dp)
-                        .clip(RoundedCornerShape(5.dp))
+                        .clip(RoundedCornerShape(7.dp))
                         .background(
                             when {
                                 v == conf -> c.ink
@@ -251,26 +310,18 @@ private fun StepSure(d: Draft, onDraft: (Draft) -> Unit) {
             }
         }
     }
-    Slider(
-        value = conf.toFloat(),
-        onValueChange = { onDraft(d.copy(confidence = (Math.round(it / 5f) * 5).coerceIn(50, 100))) },
-        valueRange = 50f..100f,
-        steps = 9,
-        colors = SliderDefaults.colors(thumbColor = c.ink, activeTrackColor = c.accent, inactiveTrackColor = c.line),
-        modifier = Modifier.semantics { contentDescription = "How sure are you" },
-    )
-    Row(Modifier.fillMaxWidth()) {
-        Text("Hunch", style = Type.small, color = c.inkQuiet, modifier = Modifier.weight(1f))
-        Text("Certain", style = Type.small, color = c.inkQuiet)
+    Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp)) {
+        Text("Hunch", style = Type.small.copy(fontSize = 12.sp), color = c.inkQuiet, modifier = Modifier.weight(1f))
+        Text("Certain", style = Type.small.copy(fontSize = 12.sp), color = c.inkQuiet)
     }
-    Spacer(Modifier.height(18.dp))
     Text(
         when {
             conf >= 95 -> "Bold call. How sure are you, really?"
             conf <= 60 -> "A hunch counts. Future you will see this."
             else -> "No wrong answer. Just be honest."
         },
-        style = Type.body, color = c.inkQuiet,
+        style = Type.body.copy(lineHeight = 22.sp), color = c.inkQuiet, textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp),
     )
     if (d.confidence == null) {
         // Record the default the moment the step is seen, so sealing keeps what is on screen.

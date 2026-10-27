@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Debug builds only: every drawn illustration on one screen, for reviewing the art.
+             Its own task, so the launcher icon always opens the real app rather than a preview left open. -->
+        <activity
+            android:name=".ArtGalleryActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity="app.deciary.preview" />
+    </application>
+</manifest>

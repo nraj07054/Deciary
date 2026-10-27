@@ -43,14 +43,15 @@ Mood colours (always shown with the word): Calm `#2F9C95`, Rushed `#E5674F`, Anx
 | Plum | `#5B3FB0` | Silver |
 | Natural tan | `#A8693A` | Brass |
 
-The cover shows the person's name pressed into the leather and "Only you can open this". The snap is a lock button. The lock screen is the same leather, closed. `design/tools/leathergen.py` draws the cover.
+The cover shows the person's name pressed into the leather and "Only you can open this". Tapping the cover locks the diary. The lock screen is the same leather, closed. `design/tools/leathergen.py` draws the cover.
 
 ## Type, shape and icons
 
 - Fraunces (headings) and Noto Sans (text); Devanagari and Bengali Noto fallbacks for v1.1.
 - Cards 20–24 dp corners, buttons fully rounded, touch targets at least 48 dp.
 - Icons: Material Symbols Rounded, weight 450.
-- Scene art and verdict objects: Fluent Emoji 3D.
+- Scene art: soft 3D illustrations drawn in Compose (`ui/components/Illustrations.kt`), lit from the top left. Settings and data rows use Material icons on tinted tiles.
+- Verdict objects: Fluent Emoji 3D.
 
 ## Verdicts
 

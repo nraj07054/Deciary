@@ -72,7 +72,26 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun lock() {
         if (prefs.value.lockOn) _locked.value = true
+        openLetterId = null
     }
+
+    /** The one letter confirmed for reading since it was opened; any other letter asks again. */
+    var openLetterId by mutableStateOf<String?>(null)
+        private set
+
+    fun unlockLetter(id: String) {
+        openLetterId = id
+    }
+
+    fun closeLetter() {
+        openLetterId = null
+    }
+
+    /**
+     * Set just before handing off to the system file picker, so coming back from it doesn't lock.
+     * Any other trip away from the app locks it on return.
+     */
+    var awayForPicker = false
 
     fun tryUnlock(pin: String): Boolean = settings.checkPin(pin).also { if (it) _locked.value = false }
 
@@ -80,16 +99,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         _locked.value = false
     }
 
-    fun setPin(pin: String, biometric: Boolean) {
-        settings.setPin(pin)
-        settings.setBiometric(biometric)
-    }
+    fun setPin(pin: String) = settings.setPin(pin)
 
     fun checkPin(pin: String) = settings.checkPin(pin)
 
-    fun turnLockOff() = settings.clearPin()
+    /** How long until another PIN can be tried, after too many wrong ones. */
+    fun pinWaitMs() = settings.pinWaitMs()
 
-    fun setBiometric(on: Boolean) = settings.setBiometric(on)
+    fun turnLockOff() = settings.clearPin()
 
     // Onboarding and settings
 
@@ -195,10 +212,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         store.replaceAll(byId.values.sortedBy { it.sealedAt })
         restored.size
     }
-
-    suspend fun exportJson(uri: Uri): Result<Unit> = io { write(uri, Backup.exportJson(letters.value)) }
-
-    suspend fun exportCsv(uri: Uri): Result<Unit> = io { write(uri, Backup.exportCsv(letters.value)) }
 
     fun deleteEverything(onDone: () -> Unit) {
         viewModelScope.launch {

@@ -1,6 +1,25 @@
 package app.deciary.ui.screens
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.sp
+import app.deciary.ui.components.LightBarIcons
+import app.deciary.ui.components.drawCover
+import app.deciary.ui.theme.Fraunces
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,7 +29,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +37,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
@@ -36,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,21 +61,19 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.deciary.Biometrics
 import app.deciary.data.Leather
-import app.deciary.ui.components.LeatherSurface
-import app.deciary.ui.components.Snap
 import app.deciary.ui.components.palette
 import app.deciary.ui.theme.Type
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 const val PIN_LENGTH = 4
 
-/** Four dots and a keypad, drawn on the leather. Shared by the lock screen and PIN setup. */
+/** Four dots and a keypad on full-screen leather, as in the design. Shared by the lock screen and PIN setup. */
 @Composable
 fun PinPad(
     leather: Leather,
@@ -67,14 +83,16 @@ fun PinPad(
     error: String?,
     onComplete: (String) -> Boolean,
     footer: @Composable () -> Unit = {},
+    blocked: Boolean = false,
 ) {
     val p = leather.palette()
+    LightBarIcons()
     var pin by remember { mutableStateOf("") }
     val shake = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
 
     fun press(d: String) {
-        if (pin.length >= PIN_LENGTH) return
+        if (blocked || pin.length >= PIN_LENGTH) return
         pin += d
         if (pin.length == PIN_LENGTH) {
             val entered = pin
@@ -89,88 +107,126 @@ fun PinPad(
         }
     }
 
-    LeatherSurface(leather, Modifier.fillMaxSize(), corner = 0.dp, stitchInset = 14.dp) {
+    Box(Modifier.fillMaxSize().background(p.base)) {
+        val strapY = with(LocalDensity.current) { (WindowInsets.statusBars.getTop(this) + 144.dp.roundToPx()).toFloat() }
+        Canvas(Modifier.matchParentSize()) { drawCover(p, strap = true, mini = false, strapY = strapY) }
         Column(
-            Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(24.dp),
+            Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 96.dp, bottom = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.weight(0.6f))
-            Snap(leather, Modifier.size(54.dp))
-            Spacer(Modifier.height(18.dp))
-            Text(title, style = Type.display, color = p.ink, textAlign = TextAlign.Center)
-            Text(subtitle, style = Type.small, color = p.ink.copy(alpha = 0.75f))
-            Spacer(Modifier.height(30.dp))
-            Text(prompt, style = Type.bodyStrong, color = p.ink)
-            Spacer(Modifier.height(14.dp))
-            Row(
-                Modifier
-                    .offset { IntOffset(shake.value.roundToInt(), 0) }
-                    .semantics { contentDescription = "${pin.length} of $PIN_LENGTH digits entered" },
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            Column(Modifier.fillMaxWidth().padding(start = 26.dp, end = 90.dp)) {
+                Text(
+                    title,
+                    style = Type.display.copy(
+                        fontSize = 54.sp, lineHeight = 54.sp, letterSpacing = (-1.08).sp,
+                        shadow = Shadow(p.hi, offset = Offset(0f, 5f), blurRadius = 0f),
+                    ),
+                    color = p.ink,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(subtitle, style = TextStyle(fontFamily = Fraunces, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Medium, fontSize = 17.sp), color = p.ink.copy(alpha = 0.82f))
+            }
+            Spacer(Modifier.height(42.dp))
+            Column(
+                Modifier.clip(RoundedCornerShape(16.dp)).background(Color(0x5907050F)).padding(horizontal = 18.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                repeat(PIN_LENGTH) { i ->
-                    Box(
-                        Modifier
-                            .size(16.dp)
-                            .clip(CircleShape)
-                            .background(if (i < pin.length) p.ink else Color.Transparent)
-                            .border(2.dp, p.ink, CircleShape),
-                    )
+                Text(prompt, style = Type.bodyStrong.copy(fontSize = 14.sp), color = p.ink)
+                Row(
+                    Modifier
+                        .offset { IntOffset(shake.value.roundToInt(), 0) }
+                        .semantics { contentDescription = "${pin.length} of $PIN_LENGTH digits entered" },
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    repeat(PIN_LENGTH) { i ->
+                        val on = i < pin.length
+                        Box(
+                            Modifier
+                                .size(if (on) 15.dp else 14.dp)
+                                .clip(CircleShape)
+                                .background(if (on) p.ink else Color.Transparent)
+                                .border(2.dp, p.ink, CircleShape),
+                        )
+                    }
                 }
             }
             Text(
                 error ?: " ",
                 style = Type.small,
                 color = Color(0xFFFFC9D9),
-                modifier = Modifier.padding(top = 10.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
             )
-            Spacer(Modifier.weight(0.4f))
+            // The keypad sits in the middle of the space below the PIN, a little lower and easier to reach.
+            Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
             val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del")
-            Column(Modifier.widthIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.width(276.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 keys.chunked(3).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                         row.forEach { k ->
-                            val m = Modifier.weight(1f).aspectRatio(1.35f).clip(CircleShape)
+                            val m = Modifier.weight(1f).height(70.dp)
                             when (k) {
                                 "" -> Spacer(m)
                                 "del" -> Box(
-                                    m.semantics { contentDescription = "Delete digit" }.clickable { pin = pin.dropLast(1) },
+                                    m.clip(CircleShape).semantics { contentDescription = "Delete digit" }.clickable { pin = pin.dropLast(1) },
                                     contentAlignment = Alignment.Center,
-                                ) { Icon(Icons.AutoMirrored.Rounded.Backspace, null, tint = p.ink) }
+                                ) { Icon(Icons.AutoMirrored.Rounded.Backspace, null, tint = p.ink, modifier = Modifier.size(26.dp)) }
                                 else -> Box(
-                                    m.background(p.ink.copy(alpha = 0.10f)).clickable { press(k) },
+                                    m.alpha(if (blocked) 0.4f else 1f).shadow(8.dp, CircleShape, ambientColor = Color.Black, spotColor = Color.Black)
+                                        .clip(CircleShape)
+                                        .background(Brush.verticalGradient(listOf(p.ink.copy(alpha = 0.16f), p.ink.copy(alpha = 0.08f))))
+                                        .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.16f), Color.Transparent)), CircleShape)
+                                        .clickable { press(k) },
                                     contentAlignment = Alignment.Center,
-                                ) { Text(k, style = Type.title, color = p.ink) }
+                                ) { Text(k, style = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold, fontSize = 28.sp), color = p.ink) }
                             }
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.weight(1f).heightIn(min = 16.dp))
             footer()
         }
     }
+}
+
+/** "0:30", "2:00". */
+fun waitLabel(ms: Long): String {
+    val s = (ms + 999) / 1000
+    return "%d:%02d".format(s / 60, s % 60)
 }
 
 @Composable
 fun LockScreen(
     name: String,
     leather: Leather,
-    biometric: Boolean,
     onPin: (String) -> Boolean,
     onBiometric: () -> Unit,
+    pinWaitMs: () -> Long = { 0L },
+    subtitle: String = "Only you can open this",
 ) {
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
     var tries by remember { mutableStateOf(0) }
-    val canBio = biometric && Biometrics.available(context)
+    // After too many wrong PINs the keypad rests for a while; tick the countdown each second.
+    var wait by remember { mutableStateOf(pinWaitMs()) }
+    LaunchedEffect(tries) {
+        wait = pinWaitMs()
+        while (wait > 0) {
+            delay(1000)
+            wait = pinWaitMs()
+        }
+    }
+    // Whenever the phone has a fingerprint set up, offer it straight away; the PIN is always there too.
+    val canBio = Biometrics.available(context)
     LaunchedEffect(Unit) { if (canBio) Biometrics.prompt(context, onBiometric) }
     PinPad(
         leather = leather,
         title = name,
-        subtitle = "Only you can open this",
+        subtitle = subtitle,
         prompt = "Enter your PIN",
-        error = error,
+        error = if (wait > 0) "Too many tries. Try again in ${waitLabel(wait)}." else error,
+        blocked = wait > 0,
         onComplete = { pin ->
             onPin(pin).also { ok ->
                 if (!ok) {
@@ -180,15 +236,22 @@ fun LockScreen(
             }
         },
         footer = {
-            if (canBio) {
-                TextButton(onClick = { Biometrics.prompt(context, onBiometric) }) {
-                    Icon(Icons.Rounded.Fingerprint, null, tint = leather.palette().ink)
-                    Spacer(Modifier.size(8.dp))
-                    Text("Use fingerprint", style = Type.bodyStrong, color = leather.palette().ink)
-                }
-            }
+            if (canBio) FingerprintPill { Biometrics.prompt(context, onBiometric) }
         },
     )
+}
+
+/** The light pill under the keypad that opens the fingerprint prompt. */
+@Composable
+fun FingerprintPill(onClick: () -> Unit) {
+    Row(
+        Modifier.heightIn(min = 52.dp).clip(CircleShape).background(Color(0xFFEEEAF8)).clickable(onClick = onClick).padding(horizontal = 22.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Rounded.Fingerprint, null, tint = Color(0xFF1D1A33), modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Text("Use fingerprint", style = Type.bodyStrong.copy(fontWeight = FontWeight.Bold), color = Color(0xFF1D1A33))
+    }
 }
 
 /** Choose a PIN, then type it again. */
@@ -213,7 +276,7 @@ fun PinSetupScreen(leather: Leather, onCancel: () -> Unit, onDone: (String) -> U
         },
         footer = {
             TextButton(onClick = onCancel, modifier = Modifier.fillMaxWidth()) {
-                Text("Not now", style = Type.bodyStrong, color = ink)
+                Text("Not now", style = Type.bodyStrong.copy(fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline), color = ink)
             }
         },
     )
