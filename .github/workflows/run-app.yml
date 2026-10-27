@@ -5,6 +5,13 @@ name: Run app on emulator
 on:
   workflow_dispatch:
   push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "gradle/**"
+      - ".github/workflows/run-app.yml"
+  pull_request:
+    branches: [main]
     paths:
       - "app/**"
       - "gradle/**"
@@ -63,8 +70,9 @@ jobs:
           name: app-run-screenshots
           path: shots
 
+      # Pull requests keep their screenshots as a run artifact only; the branch shows main.
       - name: Publish screenshots to the app-run-screenshots branch
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         run: |
           cd shots
           git init -q -b app-run-screenshots
