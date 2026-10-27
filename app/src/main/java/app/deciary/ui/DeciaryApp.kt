@@ -265,6 +265,7 @@ fun DeciaryApp(vm: AppViewModel) {
                             onReminderHour = vm::setReminderHour,
                             onReviewMonths = vm::setReviewMonths,
                             onTheme = vm::setTheme,
+                            pinWaitMs = vm::pinWaitMs,
                         ),
                     )
                 }
@@ -279,6 +280,7 @@ fun DeciaryApp(vm: AppViewModel) {
                             exportJson = vm::exportJson,
                             exportCsv = vm::exportCsv,
                             checkPin = vm::checkPin,
+                            pinWaitMs = vm::pinWaitMs,
                             deleteEverything = { vm.deleteEverything { nav.navigate(Routes.WELCOME) { popUpTo(nav.graph.id) { inclusive = true } } } },
                         ),
                     )
@@ -292,6 +294,7 @@ fun DeciaryApp(vm: AppViewModel) {
                 biometric = prefs.biometric,
                 onPin = vm::tryUnlock,
                 onBiometric = vm::unlockWithBiometric,
+                pinWaitMs = vm::pinWaitMs,
             )
         }
     }

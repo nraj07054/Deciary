@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -65,6 +66,7 @@ import app.deciary.Biometrics
 import app.deciary.data.Leather
 import app.deciary.ui.components.palette
 import app.deciary.ui.theme.Type
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -80,6 +82,7 @@ fun PinPad(
     error: String?,
     onComplete: (String) -> Boolean,
     footer: @Composable () -> Unit = {},
+    blocked: Boolean = false,
 ) {
     val p = leather.palette()
     var pin by remember { mutableStateOf("") }
@@ -87,7 +90,7 @@ fun PinPad(
     val scope = rememberCoroutineScope()
 
     fun press(d: String) {
-        if (pin.length >= PIN_LENGTH) return
+        if (blocked || pin.length >= PIN_LENGTH) return
         pin += d
         if (pin.length == PIN_LENGTH) {
             val entered = pin
@@ -152,7 +155,8 @@ fun PinPad(
                 color = Color(0xFFFFC9D9),
                 modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
             )
-            Spacer(Modifier.height(8.dp))
+            // The keypad sits in the middle of the space below the PIN, a little lower and easier to reach.
+            Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
             val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del")
             Column(Modifier.width(276.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 keys.chunked(3).forEach { row ->
@@ -166,7 +170,7 @@ fun PinPad(
                                     contentAlignment = Alignment.Center,
                                 ) { Icon(Icons.AutoMirrored.Rounded.Backspace, null, tint = p.ink, modifier = Modifier.size(26.dp)) }
                                 else -> Box(
-                                    m.shadow(8.dp, CircleShape, ambientColor = Color.Black, spotColor = Color.Black)
+                                    m.alpha(if (blocked) 0.4f else 1f).shadow(8.dp, CircleShape, ambientColor = Color.Black, spotColor = Color.Black)
                                         .clip(CircleShape)
                                         .background(Brush.verticalGradient(listOf(p.ink.copy(alpha = 0.16f), p.ink.copy(alpha = 0.08f))))
                                         .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.16f), Color.Transparent)), CircleShape)
@@ -178,10 +182,16 @@ fun PinPad(
                     }
                 }
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.weight(1f).heightIn(min = 16.dp))
             footer()
         }
     }
+}
+
+/** "0:30", "2:00". */
+fun waitLabel(ms: Long): String {
+    val s = (ms + 999) / 1000
+    return "%d:%02d".format(s / 60, s % 60)
 }
 
 @Composable
@@ -191,10 +201,20 @@ fun LockScreen(
     biometric: Boolean,
     onPin: (String) -> Boolean,
     onBiometric: () -> Unit,
+    pinWaitMs: () -> Long = { 0L },
 ) {
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
     var tries by remember { mutableStateOf(0) }
+    // After too many wrong PINs the keypad rests for a while; tick the countdown each second.
+    var wait by remember { mutableStateOf(pinWaitMs()) }
+    LaunchedEffect(tries) {
+        wait = pinWaitMs()
+        while (wait > 0) {
+            delay(1000)
+            wait = pinWaitMs()
+        }
+    }
     val canBio = biometric && Biometrics.available(context)
     LaunchedEffect(Unit) { if (canBio) Biometrics.prompt(context, onBiometric) }
     PinPad(
@@ -202,7 +222,8 @@ fun LockScreen(
         title = name,
         subtitle = "Only you can open this",
         prompt = "Enter your PIN",
-        error = error,
+        error = if (wait > 0) "Too many tries. Try again in ${waitLabel(wait)}." else error,
+        blocked = wait > 0,
         onComplete = { pin ->
             onPin(pin).also { ok ->
                 if (!ok) {

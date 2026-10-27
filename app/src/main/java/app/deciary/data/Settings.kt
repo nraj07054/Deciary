@@ -37,6 +37,16 @@ data class Prefs(
     val coverName: String get() = ownerName.trim().ifEmpty { "My diary" }
 }
 
+/** After five wrong PINs, each further miss adds a wait: 30 s, 1 min, 2 min, … up to 15 min. */
+object PinLockout {
+    const val FREE_TRIES = 5
+    const val FIRST_MS = 30_000L
+    const val MAX_MS = 15 * 60_000L
+
+    fun delayAfter(fails: Int): Long =
+        if (fails < FREE_TRIES) 0L else (FIRST_MS shl (fails - FREE_TRIES).coerceAtMost(10)).coerceAtMost(MAX_MS)
+}
+
 class Settings(context: Context) {
     private val sp = context.getSharedPreferences("deciary", Context.MODE_PRIVATE)
     private val _prefs = MutableStateFlow(read())
@@ -83,16 +93,37 @@ class Settings(context: Context) {
     fun clearPin() = edit {
         remove("pinSalt")
         remove("pinHash")
+        remove("pinFails")
+        remove("pinBlockedUntil")
         putBoolean("biometric", false)
     }
 
-    fun checkPin(pin: String): Boolean {
+    /**
+     * Checks a PIN. While a wait is running it returns false without checking, so guessing all
+     * 10,000 PINs takes days rather than minutes. A right PIN clears the count of misses.
+     */
+    fun checkPin(pin: String, now: Long = System.currentTimeMillis()): Boolean {
+        if (pinWaitMs(now) > 0) return false
         val salt = sp.getString("pinSalt", null) ?: return false
         val expected = sp.getString("pinHash", null) ?: return false
-        return java.security.MessageDigest.isEqual(
+        val ok = java.security.MessageDigest.isEqual(
             b64(hash(pin, Base64.getDecoder().decode(salt))).toByteArray(),
             expected.toByteArray(),
         )
+        if (ok) {
+            sp.edit().remove("pinFails").remove("pinBlockedUntil").apply()
+        } else {
+            val fails = sp.getInt("pinFails", 0) + 1
+            sp.edit().putInt("pinFails", fails).putLong("pinBlockedUntil", now + PinLockout.delayAfter(fails)).apply()
+        }
+        return ok
+    }
+
+    /** How long until another PIN can be tried; 0 when it can be tried now. */
+    fun pinWaitMs(now: Long = System.currentTimeMillis()): Long {
+        val until = sp.getLong("pinBlockedUntil", 0L)
+        // Capped, so setting the clock back can't stretch a wait beyond the longest one.
+        return (until - now).coerceIn(0L, PinLockout.MAX_MS)
     }
 
     /** Wipes every setting, used by "Delete everything". */

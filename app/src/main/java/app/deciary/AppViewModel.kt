@@ -87,6 +87,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun checkPin(pin: String) = settings.checkPin(pin)
 
+    /** How long until another PIN can be tried, after too many wrong ones. */
+    fun pinWaitMs() = settings.pinWaitMs()
+
     fun turnLockOff() = settings.clearPin()
 
     fun setBiometric(on: Boolean) = settings.setBiometric(on)

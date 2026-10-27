@@ -86,6 +86,7 @@ class DataActions(
     val exportCsv: suspend (Uri) -> Result<Unit>,
     val checkPin: (String) -> Boolean,
     val deleteEverything: () -> Unit,
+    val pinWaitMs: () -> Long = { 0L },
 )
 
 private sealed interface DataDialog {
@@ -251,6 +252,7 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
         DataDialog.Delete -> DeleteDialog(
             needsPin = prefs.lockOn,
             checkPin = a.checkPin,
+            pinWaitMs = a.pinWaitMs,
             onDismiss = { dialog = DataDialog.None },
             onDelete = { dialog = DataDialog.None; a.deleteEverything() },
         )
@@ -374,7 +376,7 @@ private fun PasswordDialog(
 }
 
 @Composable
-private fun DeleteDialog(needsPin: Boolean, checkPin: (String) -> Boolean, onDismiss: () -> Unit, onDelete: () -> Unit) {
+private fun DeleteDialog(needsPin: Boolean, checkPin: (String) -> Boolean, pinWaitMs: () -> Long, onDismiss: () -> Unit, onDelete: () -> Unit) {
     var typed by remember { mutableStateOf("") }
     val typedOk = typed.trim() == "DELETE"
     val field: @Composable () -> Unit = {
@@ -394,6 +396,7 @@ private fun DeleteDialog(needsPin: Boolean, checkPin: (String) -> Boolean, onDis
             onPin = { pin -> checkPin(pin).also { if (it && typedOk) onDelete() } },
             extra = field,
             canConfirm = typedOk,
+            pinWaitMs = pinWaitMs,
         )
     } else {
         AlertDialog(

@@ -51,6 +51,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,6 +86,7 @@ class SettingsActions(
     val onReminderHour: (Int) -> Unit,
     val onReviewMonths: (Int) -> Unit,
     val onTheme: (ThemeChoice) -> Unit,
+    val pinWaitMs: () -> Long = { 0L },
 )
 
 private enum class Dialog { None, LockOff, Hour, Months, Theme, Faq }
@@ -196,6 +198,7 @@ fun SettingsScreen(prefs: Prefs, a: SettingsActions) {
             confirm = "Turn off",
             onDismiss = { dialog = Dialog.None },
             onPin = { pin -> a.onLockOff(pin).also { if (it) dialog = Dialog.None } },
+            pinWaitMs = a.pinWaitMs,
         )
         Dialog.Hour -> OptionsDialog(
             "Remind me at", (6..22).map { it to hourLabel(it) }, prefs.reminderHour,
@@ -325,9 +328,27 @@ fun <T> OptionsDialog(title: String, options: List<Pair<T, String>>, selected: T
 
 /** Asks for the PIN before something sensitive. [onPin] returns whether it matched. */
 @Composable
-fun PinConfirmDialog(title: String, body: String, confirm: String, onDismiss: () -> Unit, onPin: (String) -> Boolean, extra: @Composable () -> Unit = {}, canConfirm: Boolean = true) {
+fun PinConfirmDialog(
+    title: String,
+    body: String,
+    confirm: String,
+    onDismiss: () -> Unit,
+    onPin: (String) -> Boolean,
+    extra: @Composable () -> Unit = {},
+    canConfirm: Boolean = true,
+    pinWaitMs: () -> Long = { 0L },
+) {
     var pin by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
+    var attempts by remember { mutableStateOf(0) }
+    var wait by remember { mutableStateOf(pinWaitMs()) }
+    LaunchedEffect(attempts) {
+        wait = pinWaitMs()
+        while (wait > 0) {
+            kotlinx.coroutines.delay(1000)
+            wait = pinWaitMs()
+        }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title, style = Type.heading) },
@@ -339,8 +360,12 @@ fun PinConfirmDialog(title: String, body: String, confirm: String, onDismiss: ()
                     onValueChange = { if (it.length <= PIN_LENGTH && it.all(Char::isDigit)) { pin = it; wrong = false } },
                     label = { Text("PIN") },
                     singleLine = true,
-                    isError = wrong,
-                    supportingText = if (wrong) ({ Text("That PIN didn't match.") }) else null,
+                    isError = wrong || wait > 0,
+                    supportingText = when {
+                        wait > 0 -> ({ Text("Too many tries. Try again in ${waitLabel(wait)}.") })
+                        wrong -> ({ Text("That PIN didn't match.") })
+                        else -> null
+                    },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier.fillMaxWidth(),
@@ -349,7 +374,7 @@ fun PinConfirmDialog(title: String, body: String, confirm: String, onDismiss: ()
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (!onPin(pin)) wrong = true }, enabled = pin.length == PIN_LENGTH && canConfirm) {
+            TextButton(onClick = { if (!onPin(pin)) { wrong = true; attempts++ } }, enabled = pin.length == PIN_LENGTH && canConfirm && wait <= 0) {
                 Text(confirm, color = Deciary.colors.danger)
             }
         },
