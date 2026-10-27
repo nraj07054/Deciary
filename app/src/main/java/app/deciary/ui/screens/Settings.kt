@@ -1,6 +1,24 @@
 package app.deciary.ui.screens
 
-import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import app.deciary.ui.components.IconTile
+import app.deciary.ui.components.ShieldArt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +28,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -31,7 +48,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,17 +60,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import app.deciary.Biometrics
 import app.deciary.BuildConfigInfo
-import app.deciary.R
 import app.deciary.data.Prefs
 import app.deciary.data.ThemeChoice
-import app.deciary.ui.components.Art
-import app.deciary.ui.components.Card
 import app.deciary.ui.components.CoverSwatch
 import app.deciary.ui.components.Kicker
 import app.deciary.ui.components.TopBar
@@ -88,88 +100,91 @@ fun SettingsScreen(prefs: Prefs, a: SettingsActions) {
     var dialog by remember { mutableStateOf(Dialog.None) }
 
     Column(Modifier.fillMaxSize().background(c.bg)) {
-        TopBar(title = "Settings", onBack = a.onBack)
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Card(onClick = a.onCover, padding = 16.dp) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CoverSwatch(prefs.leather, Modifier.width(64.dp).height(48.dp))
+        TopBar(onBack = a.onBack)
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).navigationBarsPadding()) {
+            Text("Settings", style = Type.display, color = c.ink, modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp))
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                val cardShape = RoundedCornerShape(24.dp)
+                Row(
+                    Modifier.fillMaxWidth().shadow(10.dp, cardShape, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(cardShape).background(c.surface)
+                        .clickable(role = Role.Button, onClick = a.onCover).padding(start = 14.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CoverSwatch(prefs.leather, Modifier.size(60.dp, 46.dp).shadow(6.dp, RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 10.dp, bottomEnd = 10.dp)))
                     Spacer(Modifier.width(14.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(prefs.coverName, style = Type.heading, color = c.ink)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(prefs.coverName, style = Type.heading.copy(fontSize = 18.sp), color = c.ink)
                         Text("${prefs.leather.label} leather · tap to change", style = Type.small, color = c.inkQuiet)
                     }
-                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = c.inkQuiet)
+                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = c.inkQuiet, modifier = Modifier.size(20.dp))
                 }
-            }
 
-            Card(color = Color(0xFF1D1A33)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Kicker("Offline by design", color = Color(0xFFC9B8FA))
-                        Spacer(Modifier.height(4.dp))
-                        Text("0 bytes sent", style = Type.title, color = Color(0xFFEEEAF8))
-                        Spacer(Modifier.height(4.dp))
+                // The privacy promise, on night ink with the shield.
+                Box(Modifier.fillMaxWidth().clip(cardShape).background(Color(0xFF1D1A33))) {
+                    ShieldArt(96.dp, Modifier.align(Alignment.CenterEnd).padding(end = 12.dp).rotate(8f))
+                    Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp).padding(end = 96.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF5FD0C6)))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Offline by design", style = Type.small.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold), color = Color(0xFFCFC9E6))
+                        }
+                        Text("0 bytes sent", style = Type.display.copy(fontSize = 34.sp, lineHeight = 36.sp), color = Color(0xFFF5F2FB))
                         Text(
                             "Deciary has no internet permission, so Android itself stops it from sending anything.",
-                            style = Type.small, color = Color(0xFFB3ADCC),
+                            style = Type.small, color = Color(0xFFC9B8FA),
                         )
                     }
-                    Spacer(Modifier.width(10.dp))
-                    Art(R.drawable.art_shield, 56.dp)
                 }
-            }
 
-            Group("Privacy") {
-                ToggleRow(
-                    R.drawable.art_locked_with_key, Color(0xFFFDF0F5), "App lock",
-                    if (prefs.lockOn) (if (prefs.biometric) "PIN and fingerprint" else "PIN") else "Off",
-                    prefs.lockOn,
-                ) { on -> if (on) a.onLockOn() else dialog = Dialog.LockOff }
-                if (prefs.lockOn && Biometrics.available(context)) {
+                Group("Privacy") {
+                    ToggleRow(
+                        Icons.Rounded.Lock, Color(0xFFFDF0F5), c.wax, "App lock",
+                        if (prefs.lockOn) (if (prefs.biometric) "PIN and fingerprint" else "PIN") else "Off",
+                        prefs.lockOn,
+                    ) { on -> if (on) a.onLockOn() else dialog = Dialog.LockOff }
+                    if (prefs.lockOn && Biometrics.available(context)) {
+                        Divider()
+                        ToggleRow(Icons.Rounded.Fingerprint, Color(0xFFEDE7FD), c.accent, "Fingerprint", if (prefs.biometric) "On" else "Off", prefs.biometric, a.onBiometric)
+                    }
                     Divider()
-                    ToggleRow(R.drawable.art_eye, Color(0xFFEDE7FD), "Fingerprint", if (prefs.biometric) "On" else "Off", prefs.biometric, a.onBiometric)
+                    LinkRow(
+                        Icons.Rounded.Inventory2, Color(0xFFEDE7FD), c.accent, "Your data",
+                        if (prefs.lastBackupAt == 0L) "Not backed up yet" else "Backed up ${daysAgo(prefs.lastBackupAt)}",
+                        a.onData,
+                    )
                 }
-                Divider()
-                LinkRow(
-                    R.drawable.art_card_file_box, Color(0xFFEDE7FD), "Your data",
-                    if (prefs.lastBackupAt == 0L) "Not backed up yet" else "Backed up ${daysAgo(prefs.lastBackupAt)}",
-                    a.onData,
+
+                Group("Letters") {
+                    ToggleRow(
+                        Icons.Rounded.Notifications, Color(0xFFFFF4DE), Color(0xFFD98A12), "Reminders",
+                        if (prefs.reminders) "On the day, ${hourLabel(prefs.reminderHour)}" else "Off",
+                        prefs.reminders, a.onReminders,
+                    )
+                    if (prefs.reminders) {
+                        Divider()
+                        LinkRow(Icons.Rounded.Schedule, Color(0xFFFFF4DE), Color(0xFFD98A12), "Reminder time", hourLabel(prefs.reminderHour)) { dialog = Dialog.Hour }
+                    }
+                    Divider()
+                    LinkRow(
+                        Icons.Rounded.CalendarMonth, Color(0xFFE8F1FD), Color(0xFF2F6FD0), "Default review date",
+                        "${reviewChoices.firstOrNull { it.first == prefs.reviewMonths }?.second ?: "${prefs.reviewMonths} months"} after sealing",
+                    ) { dialog = Dialog.Months }
+                }
+
+                Group("Look") {
+                    LinkRow(Icons.Rounded.Palette, Color(0xFFFFF4DE), Color(0xFFD98A12), "Theme", prefs.theme.label) { dialog = Dialog.Theme }
+                }
+
+                Group("Help") {
+                    LinkRow(Icons.AutoMirrored.Rounded.HelpOutline, Color(0xFFFDF0F5), c.wax, "Questions people ask", "Where is my data? Lost phone?") { dialog = Dialog.Faq }
+                }
+
+                Text(
+                    "Deciary ${BuildConfigInfo.versionName(context)}",
+                    style = Type.small, color = c.inkQuiet,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp),
                 )
             }
-
-            Group("Letters") {
-                ToggleRow(
-                    R.drawable.art_bell, Color(0xFFFFF4DE), "Reminders",
-                    if (prefs.reminders) "On the day, ${hourLabel(prefs.reminderHour)}" else "Off",
-                    prefs.reminders, a.onReminders,
-                )
-                if (prefs.reminders) {
-                    Divider()
-                    LinkRow(R.drawable.art_hourglass_not_done, Color(0xFFFFF4DE), "Reminder time", hourLabel(prefs.reminderHour)) { dialog = Dialog.Hour }
-                }
-                Divider()
-                LinkRow(
-                    R.drawable.art_spiral_calendar, Color(0xFFE8F1FD), "Default review date",
-                    "${reviewChoices.firstOrNull { it.first == prefs.reviewMonths }?.second ?: "${prefs.reviewMonths} months"} after sealing",
-                ) { dialog = Dialog.Months }
-            }
-
-            Group("Look") {
-                LinkRow(R.drawable.art_artist_palette, Color(0xFFFFF4DE), "Theme", prefs.theme.label) { dialog = Dialog.Theme }
-            }
-
-            Group("Help") {
-                LinkRow(R.drawable.art_red_question_mark, Color(0xFFFDF0F5), "Questions people ask", "Where is my data? Lost phone?") { dialog = Dialog.Faq }
-            }
-
-            Text(
-                "Deciary ${BuildConfigInfo.versionName(context)}",
-                style = Type.small, color = c.inkQuiet,
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 12.dp),
-            )
         }
     }
 
@@ -220,56 +235,67 @@ private fun Faq(q: String, a: String) {
 
 @Composable
 private fun Group(title: String, content: @Composable () -> Unit) {
-    Column {
-        Kicker(title, modifier = Modifier.padding(start = 6.dp, bottom = 8.dp))
-        Card(padding = 0.dp) { content() }
+    val c = Deciary.colors
+    val shape = RoundedCornerShape(22.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Kicker(title, modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 4.dp))
+        Column(
+            Modifier.fillMaxWidth().shadow(10.dp, shape, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(shape).background(c.surface).padding(horizontal = 14.dp),
+        ) { content() }
     }
 }
 
 @Composable
-private fun Divider() = HorizontalDivider(color = Deciary.colors.line, modifier = Modifier.padding(start = 72.dp))
+private fun Divider() = HorizontalDivider(color = Deciary.colors.line)
 
+/** A Material icon on a soft colour tile; in dark mode the tiles all share the tint. */
 @Composable
-private fun Tile(@DrawableRes art: Int, tile: Color) {
-    val bg = if (Deciary.colors.isDark) Deciary.colors.tint else tile
-    Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(bg), contentAlignment = Alignment.Center) { Art(art, 26.dp) }
+private fun Tile(icon: ImageVector, tile: Color, tint: Color) {
+    val dark = Deciary.colors.isDark
+    IconTile(icon, if (dark) Deciary.colors.tint else tile, if (dark) Deciary.colors.accentText else tint, size = 40.dp)
 }
 
 @Composable
 private fun RowText(label: String, value: String, modifier: Modifier) {
-    Column(modifier) {
-        Text(label, style = Type.bodyStrong, color = Deciary.colors.ink)
-        Text(value, style = Type.small, color = Deciary.colors.inkQuiet)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label, style = Type.body.copy(fontWeight = FontWeight.SemiBold), color = Deciary.colors.ink)
+        Text(value, style = Type.small.copy(fontSize = 12.sp), color = Deciary.colors.inkQuiet)
     }
 }
 
 @Composable
-private fun ToggleRow(@DrawableRes art: Int, tile: Color, label: String, value: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun ToggleRow(icon: ImageVector, tile: Color, tint: Color, label: String, value: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 62.dp).toggleable(checked, role = Role.Switch, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Tile(icon, tile, tint)
+        Spacer(Modifier.width(12.dp))
+        RowText(label, value, Modifier.weight(1f))
+        DesignSwitch(checked)
+    }
+}
+
+/** The design's switch: a 48 × 30 track with a white knob that slides across. */
+@Composable
+private fun DesignSwitch(on: Boolean) {
     val c = Deciary.colors
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).toggleable(checked, role = Role.Switch, onValueChange = onChange).padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Tile(art, tile)
-        Spacer(Modifier.width(16.dp))
-        RowText(label, value, Modifier.weight(1f))
-        Switch(
-            checked = checked, onCheckedChange = null,
-            colors = SwitchDefaults.colors(checkedTrackColor = c.accent, checkedThumbColor = c.onAccent, uncheckedTrackColor = c.line, uncheckedBorderColor = c.line),
-        )
+    val x by animateDpAsState(if (on) 21.dp else 3.dp, label = "knob")
+    Box(Modifier.size(48.dp, 30.dp).clip(CircleShape).background(if (on) c.accent else if (c.isDark) c.line else Color(0xFFCFC7E3))) {
+        Box(Modifier.offset(x = x, y = 3.dp).size(24.dp).shadow(2.dp, CircleShape).clip(CircleShape).background(Color.White))
     }
 }
 
 @Composable
-private fun LinkRow(@DrawableRes art: Int, tile: Color, label: String, value: String, onClick: () -> Unit) {
+private fun LinkRow(icon: ImageVector, tile: Color, tint: Color, label: String, value: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().heightIn(min = 62.dp).clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Tile(art, tile)
-        Spacer(Modifier.width(16.dp))
+        Tile(icon, tile, tint)
+        Spacer(Modifier.width(12.dp))
         RowText(label, value, Modifier.weight(1f))
-        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = Deciary.colors.inkQuiet)
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = Deciary.colors.inkQuiet, modifier = Modifier.size(20.dp))
     }
 }
 

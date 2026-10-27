@@ -22,7 +22,7 @@ A native Android app in Kotlin with Jetpack Compose and Material 3. Min SDK 26 (
 - **Reminders:** a daily check at the hour you pick (WorkManager). Notifications never show a letter's title.
 - **Your data:** backups are one file encrypted with a password you choose (AES-GCM, PBKDF2 key). Restore, export as JSON or CSV, and delete everything (PIN plus typing DELETE).
 - **Safety:** if a letter's words suggest someone may be in crisis, a calm sheet offers the Tele-MANAS helpline (14416) and switches challenge questions off. Saving is never blocked.
-- **Look:** the design's colour tokens in light and dark, Fraunces and Noto Sans bundled, stitched leather covers drawn in Compose, Fluent Emoji artwork.
+- **Look:** the design's colour tokens in light and dark, Fraunces and Noto Sans bundled, stitched leather covers and soft 3D scene art drawn in Compose, Fluent Emoji for the four verdict objects.
 
 ### Build and run
 
@@ -80,6 +80,6 @@ The `.dc.html` files are Design Component sources made for the claude.ai design 
 
 ## Credits
 
-- 3D artwork: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), MIT licence.
+- Verdict artwork: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), MIT licence. The mockups in `design/` use more of the set.
 - Icons: [Material Symbols Rounded](https://fonts.google.com/icons) by Google, Apache 2.0 licence.
 - Fonts: [Fraunces](https://fonts.google.com/specimen/Fraunces) and [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans), SIL Open Font Licence.

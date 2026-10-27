@@ -1,9 +1,38 @@
 package app.deciary.ui.screens
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.rounded.DataObject
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.TableChart
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import app.deciary.ui.components.FileCabinetArt
+import app.deciary.ui.components.IconTile
+import app.deciary.ui.components.LabeledField
+import app.deciary.ui.components.TwoToneTitle
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +50,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,12 +66,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import app.deciary.R
 import app.deciary.data.NotABackupException
 import app.deciary.data.Prefs
 import app.deciary.data.WrongPasswordException
-import app.deciary.ui.components.Art
-import app.deciary.ui.components.Card
 import app.deciary.ui.components.Kicker
 import app.deciary.ui.components.PrimaryButton
 import app.deciary.ui.components.TopBar
@@ -119,59 +144,70 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
     }
 
     Column(Modifier.fillMaxSize().background(c.bg)) {
-        TopBar(title = "Your data", onBack = a.onBack)
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text("Everything lives on this phone. Keep a copy safe.", style = Type.body, color = c.inkQuiet, modifier = Modifier.padding(horizontal = 4.dp))
-            Card(color = c.tint) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Kicker(if (busy) "Working" else "Last backup")
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            when {
-                                busy -> "One moment"
-                                prefs.lastBackupAt == 0L -> "Never"
-                                else -> daysAgo(prefs.lastBackupAt).replaceFirstChar { it.uppercase() }
-                            },
-                            style = Type.title, color = c.ink,
-                        )
+        TopBar(onBack = a.onBack)
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).navigationBarsPadding()) {
+            Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                TwoToneTitle("Your", "data")
+                Text("Everything lives on this phone. Keep a copy safe.", style = Type.body.copy(fontSize = 14.sp), color = c.inkQuiet)
+            }
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                val shape = RoundedCornerShape(28.dp)
+                Column(Modifier.fillMaxWidth().shadow(14.dp, shape, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(shape).background(c.surface)) {
+                    Box(Modifier.fillMaxWidth().height(118.dp).background(c.tint).padding(horizontal = 20.dp)) {
+                        FileCabinetArt(104.dp, Modifier.align(Alignment.TopEnd).padding(top = 8.dp))
+                        Column(Modifier.align(Alignment.CenterStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Kicker(if (busy) "Working" else "Last backup", color = if (c.isDark) c.accentText else Color(0xFF4A3A8C))
+                            Text(
+                                when {
+                                    busy -> "One moment"
+                                    prefs.lastBackupAt == 0L -> "Never"
+                                    else -> daysAgo(prefs.lastBackupAt).replaceFirstChar { it.uppercase() }
+                                },
+                                style = Type.display.copy(fontSize = 30.sp, lineHeight = 32.sp), color = c.ink,
+                            )
+                        }
                     }
-                    if (busy) CircularProgressIndicator(color = c.accent) else Art(R.drawable.art_inbox_tray, 60.dp)
+                    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(
+                            "A backup is one file, locked with a password you choose. Save it to Downloads, a USB stick or your laptop.",
+                            style = Type.body.copy(fontSize = 14.sp, lineHeight = 20.sp), color = c.inkQuiet,
+                        )
+                        if (busy) {
+                            LinearProgressIndicator(
+                                Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
+                                color = c.accent, trackColor = Color(0xFFEEEAF7),
+                            )
+                        }
+                        PrimaryButton("Back up now", onClick = { dialog = DataDialog.BackupPassword }, enabled = !busy && letterCount > 0)
+                    }
                 }
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "A backup is one file, locked with a password you choose. Save it to Downloads, a USB stick or your laptop.",
-                    style = Type.small, color = c.inkQuiet,
-                )
-                Spacer(Modifier.height(16.dp))
-                PrimaryButton("Back up now", onClick = { dialog = DataDialog.BackupPassword }, enabled = !busy && letterCount > 0)
-            }
 
-            Card(padding = 0.dp) {
-                ActionRow(R.drawable.art_outbox_tray, "Restore from a backup", "Needs the backup password") {
-                    openBackup.launch(arrayOf("*/*"))
+                val list = RoundedCornerShape(22.dp)
+                Column(Modifier.fillMaxWidth().shadow(10.dp, list, ambientColor = Color(0x731D1A33), spotColor = Color(0x731D1A33)).clip(list).background(c.surface).padding(horizontal = 14.dp)) {
+                    ActionRow(Icons.Rounded.Download, Color(0xFFE8F1FD), Color(0xFF2F6FD0), "Restore from a backup", "Needs the backup password") {
+                        openBackup.launch(arrayOf("*/*"))
+                    }
+                    HorizontalDivider(color = c.line)
+                    ActionRow(Icons.Rounded.DataObject, Color(0xFFEDE7FD), c.accent, "Export as JSON", "For moving to another app") {
+                        createJson.launch("deciary-$stamp.json")
+                    }
+                    HorizontalDivider(color = c.line)
+                    ActionRow(Icons.Rounded.TableChart, Color(0xFFE3F5EF), Color(0xFF2F9C7A), "Export as CSV", "Opens in any spreadsheet") {
+                        createCsv.launch("deciary-$stamp.csv")
+                    }
                 }
-                HorizontalDivider(color = c.line, modifier = Modifier.padding(start = 72.dp))
-                ActionRow(R.drawable.art_file_cabinet, "Export as JSON", "For moving to another app") {
-                    createJson.launch("deciary-$stamp.json")
-                }
-                HorizontalDivider(color = c.line, modifier = Modifier.padding(start = 72.dp))
-                ActionRow(R.drawable.art_bookmark_tabs, "Export as CSV", "Opens in any spreadsheet") {
-                    createCsv.launch("deciary-$stamp.csv")
-                }
-            }
 
-            Card(padding = 0.dp) {
-                ActionRow(
-                    R.drawable.art_wastebasket, "Delete everything",
-                    if (prefs.lockOn) "Needs your PIN and typing DELETE. Can't be undone." else "Needs typing DELETE. Can't be undone.",
-                    danger = true,
-                ) { dialog = DataDialog.Delete }
+                Spacer(Modifier.height(24.dp))
+                Box(
+                    Modifier.fillMaxWidth().clip(list).background(c.surface).border(1.5.dp, if (c.isDark) c.danger.copy(alpha = 0.5f) else Color(0xFFF2C9D8), list).padding(horizontal = 14.dp),
+                ) {
+                    ActionRow(
+                        Icons.Rounded.DeleteOutline, Color(0xFFFDF0F5), c.danger, "Delete everything",
+                        if (prefs.lockOn) "Needs your PIN and typing DELETE. Can't be undone." else "Needs typing DELETE. Can't be undone.",
+                        danger = true,
+                    ) { dialog = DataDialog.Delete }
+                }
             }
-            Spacer(Modifier.height(16.dp))
         }
     }
 
@@ -194,12 +230,10 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
             dialog = DataDialog.None
             createBackup.launch("deciary-backup-$stamp.deciary")
         }
-        is DataDialog.RestorePassword -> PasswordDialog(
-            title = "Restore from a backup",
-            body = "Letters already on this phone stay. The backup adds any that are missing.",
-            confirmField = false,
-            // Restoring is an edge state: plain, calm wording, no playfulness.
-            error = if (d.wrong) "That password doesn't open this backup. Your letters on this phone are untouched." else null,
+        is DataDialog.RestorePassword -> RestoreSheet(
+            uri = d.uri,
+            wrong = d.wrong,
+            onChange = { dialog = DataDialog.None; openBackup.launch(arrayOf("*/*")) },
             onDismiss = { dialog = DataDialog.None },
         ) { pw ->
             dialog = DataDialog.None
@@ -224,17 +258,74 @@ fun DataScreen(prefs: Prefs, letterCount: Int, a: DataActions) {
 }
 
 @Composable
-private fun ActionRow(@DrawableRes art: Int, label: String, sub: String, danger: Boolean = false, onClick: () -> Unit) {
+private fun ActionRow(icon: ImageVector, tile: Color, tint: Color, label: String, sub: String, danger: Boolean = false, onClick: () -> Unit) {
     val c = Deciary.colors
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(onClick = onClick).padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Art(art, 36.dp)
-        Spacer(Modifier.width(20.dp))
-        Column(Modifier.weight(1f)) {
-            Text(label, style = Type.bodyStrong, color = if (danger) c.danger else c.ink)
-            Text(sub, style = Type.small, color = c.inkQuiet)
+        IconTile(icon, if (c.isDark) c.tint else tile, if (c.isDark) (if (danger) c.danger else c.accentText) else tint)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(label, style = Type.body.copy(fontSize = if (danger) 17.sp else 15.sp, fontWeight = if (danger) FontWeight.Bold else FontWeight.SemiBold), color = if (danger) c.danger else c.ink)
+            Text(sub, style = Type.small.copy(fontSize = 12.sp), color = c.inkQuiet)
+        }
+    }
+}
+
+/** Restoring, as a bottom sheet: the chosen file, its password, and a plain error if it's wrong. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RestoreSheet(uri: android.net.Uri, wrong: Boolean, onChange: () -> Unit, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    val c = Deciary.colors
+    val context = LocalContext.current
+    var pw by remember { mutableStateOf("") }
+    val name = remember(uri) {
+        runCatching {
+            context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { if (it.moveToFirst()) it.getString(0) else null }
+        }.getOrNull()?.substringBeforeLast('.') ?: "Your backup"
+    }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = c.surface,
+        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+        dragHandle = { Box(Modifier.padding(top = 10.dp).size(40.dp, 4.dp).clip(CircleShape).background(c.line)) },
+    ) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp).imePadding(), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Text("Restore from a backup", style = Type.title, color = c.ink)
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(c.bg).padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconTile(Icons.Rounded.Download, if (c.isDark) c.tint else Color(0xFFE8F1FD), if (c.isDark) c.accentText else Color(0xFF2F6FD0), size = 44.dp)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(name, style = Type.body.copy(fontWeight = FontWeight.SemiBold), color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("Letters already here stay; missing ones are added", style = Type.small.copy(fontSize = 12.sp), color = c.inkQuiet)
+                }
+                Text("Change", style = Type.body.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold), color = c.accentText, modifier = Modifier.clickable(role = Role.Button, onClick = onChange).padding(8.dp))
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LabeledField(
+                    "Backup password", pw, { pw = it }, error = wrong,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, capitalization = KeyboardCapitalization.None),
+                )
+                if (wrong) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Icon(Icons.Outlined.ErrorOutline, null, tint = Color(0xFFA93226), modifier = Modifier.size(16.dp).padding(top = 1.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("That password doesn't open this backup. Check it and try again.", style = Type.small.copy(lineHeight = 19.sp), color = Color(0xFFA93226))
+                    }
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                PrimaryButton(if (wrong) "Try again" else "Restore", onClick = { onConfirm(pw) }, enabled = pw.isNotEmpty())
+                Box(Modifier.fillMaxWidth().heightIn(min = 44.dp).clickable(role = Role.Button, onClick = onDismiss), contentAlignment = Alignment.Center) {
+                    Text("Cancel", style = Type.body.copy(fontWeight = FontWeight.Bold), color = c.ink)
+                }
+            }
         }
     }
 }

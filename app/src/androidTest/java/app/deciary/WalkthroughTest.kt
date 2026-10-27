@@ -1,5 +1,6 @@
 package app.deciary
 
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -64,13 +65,16 @@ class WalkthroughTest {
     private fun tapDescribed(description: String) = retry { rule.onNodeWithContentDescription(description).performClick() }
 
     private fun type(label: String, value: String) {
-        rule.onNode(hasSetTextAction() and hasText(label)).performScrollTo().performTextInput(value)
+        // Fields are named by their label: as text on Material fields, as a description on the design's own fields.
+        rule.onNode(hasSetTextAction() and (hasText(label) or hasContentDescription(label))).performScrollTo().performTextInput(value)
         Espresso.closeSoftKeyboard()
     }
 
     @Test
     fun walkThroughTheApp() {
         sh("mkdir -p /sdcard/Download/deciary-shots")
+        // Android 13+ asks for notifications when the first letter is sealed; grant it so the prompt doesn't cover the app.
+        if (android.os.Build.VERSION.SDK_INT >= 33) sh("pm grant app.deciary android.permission.POST_NOTIFICATIONS")
 
         // First run
         screenshot("welcome-1")
@@ -86,7 +90,7 @@ class WalkthroughTest {
         screenshot("home-empty")
 
         // Writing a letter
-        tap("New decision")
+        tap("Write your first letter")
         type("The decision", "Accept the Pune job offer?")
         type("What you chose", "Yes, I'm taking it")
         screenshot("write-decision")

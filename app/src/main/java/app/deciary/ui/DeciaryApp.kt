@@ -144,6 +144,7 @@ fun DeciaryApp(vm: AppViewModel) {
                         onSettings = { nav.navigate(Routes.SETTINGS) },
                         onData = { nav.navigate(Routes.DATA) },
                         onLock = vm::lock,
+                        onReminders = vm::setReminders,
                     )
                 }
                 composable(Routes.WRITE) {

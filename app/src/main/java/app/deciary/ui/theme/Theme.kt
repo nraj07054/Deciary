@@ -90,7 +90,7 @@ private fun noto(weight: Int) = Font(
     variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
 )
 
-val Fraunces = FontFamily(fraunces(400), fraunces(500), fraunces(600), fraunces(700))
+val Fraunces = FontFamily(fraunces(400), fraunces(500), fraunces(600), fraunces(700), fraunces(800))
 val NotoSans = FontFamily(noto(400), noto(500), noto(600), noto(700), noto(800))
 
 private val LocalColors = staticCompositionLocalOf { LightColors }
@@ -101,14 +101,16 @@ object Deciary {
 }
 
 object Type {
-    val display = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold, fontSize = 34.sp, lineHeight = 38.sp, letterSpacing = (-0.5).sp)
-    val title = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold, fontSize = 26.sp, lineHeight = 31.sp, letterSpacing = (-0.3).sp)
+    val display = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, lineHeight = 37.sp, letterSpacing = (-0.36).sp)
+    val title = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 30.sp)
     val heading = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 25.sp)
     val letter = TextStyle(fontFamily = Fraunces, fontWeight = FontWeight.Normal, fontSize = 18.sp, lineHeight = 26.sp)
     val body = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp)
     val bodyStrong = body.copy(fontWeight = FontWeight.SemiBold)
+    /** The intro line under a page title. */
+    val lead = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp)
     val small = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp)
-    val label = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.6.sp)
+    val label = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 1.2.sp)
     val button = TextStyle(fontFamily = NotoSans, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 20.sp)
 }
 
