@@ -56,6 +56,7 @@ Every push builds debug and release APKs on GitHub Actions (`.github/workflows/a
 | `design/tools/leathergen.py` | Generates the stitched leather cover as SVG |
 | `design/canvas.json` | Layout of the screens on the design canvas |
 | `docs/DESIGN.md` | Summary of the design system and decisions |
+| `docs/ROADMAP.md` | Planned features, starting with decision-type tags |
 
 The living design canvas and the full design document are on claude.ai (private links, owner access only).
 
