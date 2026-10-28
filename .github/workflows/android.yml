@@ -23,10 +23,13 @@ jobs:
       - name: Unit tests
         run: ./gradlew testDebugUnitTest
 
+      # Pull requests only run the tests; the APKs are built from main (or a run started by hand).
       - name: Build APKs
+        if: github.event_name != 'pull_request'
         run: ./gradlew assembleDebug assembleRelease
 
       - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           name: deciary-apks
           path: |
