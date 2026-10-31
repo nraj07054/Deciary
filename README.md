@@ -80,6 +80,12 @@ The `.dc.html` files are Design Component sources made for the claude.ai design 
 - **Diary cover:** stitched leather in Ink (rose-gold snap), Plum (silver snap) or Natural tan (brass snap). The name is pressed into the leather, and tapping the cover locks the diary.
 - **Icon:** a D-shaped envelope whose flap and seal read as clock hands.
 
+## Support
+
+Deciary is free, private and offline. If it's useful to you, you can buy me a coffee on Ko-fi.
+
+[![Buy me a coffee on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/hey_nikhilraj)
+
 ## Credits
 
 - Verdict artwork: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji), MIT licence. The mockups in `design/` use more of the set.
