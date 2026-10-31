@@ -84,7 +84,9 @@ The `.dc.html` files are Design Component sources made for the claude.ai design 
 
 Deciary is free, private and offline. If it's useful to you, you can buy me a coffee on Ko-fi.
 
-[![Buy me a coffee on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/hey_nikhilraj)
+<p align="center">
+  <a href="https://ko-fi.com/hey_nikhilraj"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy me a coffee on Ko-fi"></a>
+</p>
 
 ## Credits
 
